@@ -1,20 +1,33 @@
 <!-- markdownlint-disable-file MD033 MD041 -->
 ![Hugo Theme FixIt](https://fixit.lruihao.cn/images/apple-devices-preview.png)
 
-<div align="center">English | <a href="README.zh-cn.md">简体中文</a></div>
+<div align="center" class="ignore">
+  <p>
+    FixIt is a clean, elegant but advanced blog theme for <a href="https://gohugo.io/">Hugo</a>.<br>
+    <em><sub>Don't forget to leave a ⭐️ if you like this theme, thanks!</sub></em>
+  </p>
+  English |
+  <a href="/README.zh-cn.md">简体中文</a> |
+  <a href="https://fixit.lruihao.cn/zh-cn/ecosystem/hugo-fixit/fixit/?lang=chinese_traditional">繁體中文</a> |
+  <a href="https://fixit.lruihao.cn/ecosystem/hugo-fixit/fixit/?lang=french">Français</a> |
+  <a href="https://fixit.lruihao.cn/ecosystem/hugo-fixit/fixit/?lang=russian">Русский язык</a> |
+  <a href="https://fixit.lruihao.cn/ecosystem/hugo-fixit/fixit/?lang=spanish">Español</a> |
+  <a href="https://fixit.lruihao.cn/ecosystem/hugo-fixit/fixit/?lang=hindi">हिन्दी</a> |
+  <a href="https://fixit.lruihao.cn/ecosystem/hugo-fixit/fixit/?lang=german">deutsch</a> |
+  <a href="https://fixit.lruihao.cn/ecosystem/hugo-fixit/fixit/?lang=korean">한국어</a> |
+  <a href="https://fixit.lruihao.cn/ecosystem/hugo-fixit/fixit/?lang=japanese">しろうと</a>
+</div>
 
 <a title="FixIt website" href="https://fixit.lruihao.cn"><img align="right" alt="FixIt logo" width="70" height="70" src="https://avatars.githubusercontent.com/u/110414864?s=200&v=4"></a>
 
 # FixIt
 
+> It is based on the original [LoveIt](https://github.com/dillonzq/LoveIt) Theme, [KeepIt](https://github.com/Fastbyte01/KeepIt) Theme and [LeaveIt](https://github.com/liuzc/LeaveIt) Theme.
+
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/hugo-fixit/FixIt?style=flat)](https://github.com/hugo-fixit/FixIt/releases)
-[![Hugo](https://img.shields.io/badge/Hugo-%5E0.132.0-ff4088?style=flat&logo=hugo)](https://gohugo.io/)
+[![Hugo](https://img.shields.io/badge/Hugo-%5E0.141.0-ff4088?style=flat&logo=hugo)](https://gohugo.io/)
 [![License](https://img.shields.io/github/license/hugo-fixit/FixIt?style=flat)](/LICENSE)
 [![Open Source Love](https://badges.frapsoft.com/os/v1/open-source.svg?v=103)](https://github.com/hugo-fixit/FixIt)
-
-> «FixIt» is a **clean**, **elegant** but **advanced** blog theme for [Hugo](https://gohugo.io/).
-
-It is based on the original [LoveIt](https://github.com/dillonzq/LoveIt) Theme, [KeepIt](https://github.com/Fastbyte01/KeepIt) Theme and [LeaveIt](https://github.com/liuzc/LeaveIt) Theme.
 
 ## Live Preview
 
@@ -22,25 +35,43 @@ It is based on the original [LoveIt](https://github.com/dillonzq/LoveIt) Theme, 
   💟 <a href="https://fixit.lruihao.cn">Production</a> | ❇️ <a href="https://pre.fixit.lruihao.cn">Preview</a> | 🚼 <a href="https://demo.fixit.lruihao.cn">Demo</a> | 🆕 <a href="https://hugo-fixit.github.io/hugo-fixit-starter/">Starter</a>
 <br>
 <br>
-  More «FixIt» examples <a href="https://fixit.lruihao.cn/showcase/">here</a>.
+  More FixIt examples <a href="https://fixit.lruihao.cn/showcase/">here</a>.
 </p>
 
-## Documentation
+## Why choose FixIt
+
+I don't know why 🤷.
+
+<!-- Too lazy to write... -->
+
+## Usage
+
+### Documentation
 
 Head to the [Quick Start](https://fixit.lruihao.cn/documentation/getting-started/quick-start/) page for a step-by-step guide on how to create a new website with FixIt.
 
 Outline: [Installation](https://fixit.lruihao.cn/documentation/installation/) ➜ [Getting Started](https://fixit.lruihao.cn/documentation/getting-started/) ➜ [Content Management](https://fixit.lruihao.cn/documentation/content-management/) ➜ [Advanced Usage](https://fixit.lruihao.cn/documentation/advanced/)
 
-## Template repository
+### Starter Wizard
+
+We provided a CLI tool to help you create a new project with FixIt by a single command.
+
+```bash
+pnpx fixit-cli create my-blog
+```
+
+[![asciicast](https://asciinema.org/a/697494.svg)](https://asciinema.org/a/697494)
+
+### Templates
 
 Click the following links to generate a new repository with template:
 
-| Template repository                        | Generate link                  |
-| :----------------------------------------- | :----------------------------: |
-| [hugo-fixit/hugo-fixit-starter][starter]   | [Click][starter:generate]      |
-| [hugo-fixit/hugo-fixit-starter1][starter1] | [Click][starter1:generate]     |
-| [hugo-fixit/docs][docs]                    | [Click][docs:generate]         |
-| [Lruihao/hugo-blog][lruihao-blog]          | [Click][lruihao-blog:generate] |
+| Template                                      | repository                        | Generate link                  |
+| :-------------------------------------------- | :-------------------------------- | :----------------------------: |
+| A quick-start template base on Hugo Modules.  | [hugo-fixit-starter][starter]     | [Click][starter:generate]      |
+| A quick-start template base on Git submodule. | [hugo-fixit-starter1][starter1]   | [Click][starter1:generate]     |
+| Build multilingual sites using Fixit theme.   | [docs][docs]                      | [Click][docs:generate]         |
+| Customize with FixIt theme.                   | [Lruihao/hugo-blog][lruihao-blog] | [Click][lruihao-blog:generate] |
 
 [starter]: https://github.com/hugo-fixit/hugo-fixit-starter
 [starter:generate]: https://github.com/hugo-fixit/hugo-fixit-starter/generate
@@ -51,9 +82,10 @@ Click the following links to generate a new repository with template:
 [lruihao-blog]: https://github.com/Lruihao/hugo-blog
 [lruihao-blog:generate]: https://github.com/Lruihao/hugo-blog/generate
 
-<!-- ## Why choose FixIt -->
-
 ## Features
+
+<details>
+<summary>Click to view.</summary>
 
 ### Performance and SEO
 
@@ -61,6 +93,11 @@ Click the following links to generate a new repository with template:
 - Optimized SEO performance with a correct **SEO SCHEMA** based on JSON-LD
 - **[Google Analytics](https://analytics.google.com/analytics)** supported
 - **[Fathom Analytics](https://usefathom.com/)** supported
+- **[Baidu Analytics](https://tongji.baidu.com/)** supported
+- **[Umami Analytics](https://umami.is/)** supported
+- **[Plausible Analytics](https://plausible.io/)** supported
+- **[Cloudflare Web Analytics](https://www.cloudflare.com/web-analytics)** supported
+- **[Splitbee Analytics](https://splitbee.io)** supported
 - Search engine **verification** supported (Google, Bing, Yandex, Pinterest, Baidu, 360 and Sogou)
 - **CDN** for third-party libraries supported
 
@@ -94,11 +131,13 @@ Click the following links to generate a new repository with template:
 
 ### Extended Features
 
+- **AI Summary**, **AI Search** and **AI Chatbot** supported by [PostChat](https://ai.tianli0.top/?InviteID=IRE1S88Z)
 - **PWA (Progressive Web App)** supported
 - **Sub Menu** supported
 - **Content Encryption** supported (Pages, Partial)
 - **Friends** page embedded template
-- **Search** supported by [algolia](https://www.algolia.com/) or [Fuse.js](https://fusejs.io/)
+- **Search** supported by [algolia](https://www.algolia.com/), [Fuse.js](https://fusejs.io/), CSE or [PostChat](https://ai.tianli0.top/?InviteID=IRE1S88Z)
+- **Custom Search Engine (CSE)** supported by [Google](https://programmablesearchengine.google.com/)
 - **Twemoji** supported
 - Automatically **highlighting** code
 - **Copy code** to clipboard with one click
@@ -124,13 +163,14 @@ Click the following links to generate a new repository with template:
 - Options to **cache remote image** locally
 - ...
 
-### Theme Components
-
-The FixIt theme balances **simplicity** and **extensibility** with extra [Hugo theme components](https://fixit.lruihao.cn/components/) for customization.
+</details>
 
 ## Multilingual and i18n
 
-FixIt supports the following languages:
+FixIt supports multilingual and i18n. For more information, see the [Content Management](https://fixit.lruihao.cn/documentation/content-management/introduction#multilingual) documentation. You are welcome to [contribute with a new language](https://github.com/hugo-fixit/FixIt/pulls).
+
+<details>
+<summary>FixIt supports the following languages.</summary>
 
 - English
 - Simplified Chinese
@@ -146,9 +186,44 @@ FixIt supports the following languages:
 - Romanian
 - Vietnamese
 - Hindi
-- [Contribute with a new language](https://github.com/hugo-fixit/FixIt/pulls)
 
-[Languages Compatibility](https://fixit.lruihao.cn/documentation/basics/#language-compatibility)
+</details>
+
+## Theme Components
+
+The FixIt theme balances **simplicity** and **extensibility** with extra [Hugo theme components](https://fixit.lruihao.cn/ecosystem/#-components) for customization.
+
+<details>
+<summary>Click to view.</summary>
+
+<!-- HUGO_FIXIT_COMPONENTS:START -->
+- [fixit-bundle](https://github.com/hugo-fixit/fixit-bundle)\
+  🌲 Bundles the FixIt core theme and all hugo-fixit components into a single component.
+- [cmpt-flyfish](https://github.com/hugo-fixit/cmpt-flyfish)\
+  🐟 一个 canvas 实现的小鱼游动动画效果。
+- [cmpt-mdevtools](https://github.com/hugo-fixit/cmpt-mdevtools)\
+  Mobile devtools component powered by vConsole and eruda.
+- [cmpt-translate](https://github.com/hugo-fixit/cmpt-translate)\
+  🌐 A component for site automatic translation.
+- [component-projects](https://github.com/hugo-fixit/component-projects)\
+  🐙 Display your GitHub projects in the FixIt theme and generate blog posts from readme.
+- [hugo-atom-feed](https://github.com/hugo-fixit/hugo-atom-feed)\
+  Hugo theme component for ATOM feed custom Output Format.
+- [hugo-json-feed](https://github.com/hugo-fixit/hugo-json-feed)\
+  Hugo theme component for JSON feed custom Output Format.
+- [shortcode-asciinema](https://github.com/hugo-fixit/shortcode-asciinema)\
+  A Hugo theme component with asciinema-embed shortcode.
+- [shortcode-caniuse](https://github.com/hugo-fixit/shortcode-caniuse)\
+  一个含有 caniuse shortcode 的 Hugo 主题组件。
+- [shortcode-docs-bookmark](https://github.com/hugo-fixit/shortcode-docs-bookmark)\
+  🔖 Embed bookmark of FixIt Docs.
+- [shortcode-mmt-netease](https://github.com/hugo-fixit/shortcode-mmt-netease)\
+  🎶 A Hugo theme component with a NetEase Cloud random comment shortcode.
+- [shortcode-rewards](https://github.com/hugo-fixit/shortcode-rewards)\
+  A Hugo theme component with reward-log or sponsor-log shortcode.
+<!-- HUGO_FIXIT_COMPONENTS:END -->
+
+</details>
 
 ## Community
 
@@ -161,8 +236,6 @@ All feedback is welcome! Head over to the [discussions][discussions], [Pull requ
 | [FixIt QQ group][qq-group]  | QQ group: `814031017`           |
 | [Hugo FixIt Planet][zsxq]   | Paid knowledge Planet           |
 
-Don't forget to leave a ⭐️ if you like this theme, thanks!
-
 [discussions]: https://github.com/hugo-fixit/FixIt/discussions
 [pulls]: https://github.com/hugo-fixit/FixIt/pulls
 [issues]: https://github.com/hugo-fixit/FixIt/issues
@@ -172,7 +245,7 @@ Don't forget to leave a ⭐️ if you like this theme, thanks!
 
 ## Contributing
 
-We welcome you to join the development of FixIt. Please see [contributing document](CONTRIBUTING.md). 🤗
+We welcome you to join the development of FixIt. Please see [contributing document](/CONTRIBUTING.md). 🤗
 
 Also, we welcome Issue or PR to our [official-components](https://github.com/hugo-fixit).
 
@@ -233,15 +306,19 @@ Thanks to all the [contributors](https://github.com/hugo-fixit/FixIt/graphs/cont
 
 ## License
 
-FixIt is licensed under the **MIT** license. Check the [LICENSE file](LICENSE) for details.
+FixIt is licensed under the **MIT** license. Check the [LICENSE file](/LICENSE) for details.
 
 ## Sponsor
 
 If you enjoy the theme, please consider buying me a coffee ☕️. Thanks!
 
-- [Wechat](images/wechatpay.jpg)
-- [Alipay](images/alipay.jpg)
+- [Wechat](/images/wechatpay.jpg)
+- [Alipay](/images/alipay.jpg)
 - [PayPal](https://paypal.me/Lruihao)
+
+Thanks to the following sponsors for their support:
+
+- [translate.js](https://github.com/xnx3/translate) Sponsoring [Enterprise Translation Channel](https://translate.zvo.cn/4087.html).
 
 ## Author
 

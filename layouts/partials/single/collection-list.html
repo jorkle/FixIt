@@ -8,10 +8,10 @@
     {{- $open := eq (index $collectionTerms 0) . -}}
     {{- $currentKey := 0 -}}
 
-    <div class="details collection-details{{ with $params.password }} encrypted-hidden{{ end }}{{ if $open }} open{{ end }}">
+    <div class="details collection-details{{ if $open }} open{{ end }}">
       <div class="details-summary collection-summary">
         {{ dict "Class" "fa-solid fa-layer-group fa-fw" | partial "plugin/icon.html" }}
-        <span class="collection-name" data-collections="{{ T "collections" }}">{{ .LinkTitle }}</span>
+        <span class="collection-name" title="{{ T "collections" }}">{{ .LinkTitle }}</span>
         <span class="collection-count">{{ $pages.Len }}</span>
         {{- dict "Class" "details-icon fa-solid fa-angle-right fa-fw" | partial "plugin/icon.html" -}}
       </div>
@@ -21,12 +21,14 @@
             {{- range $key, $page := $pages -}}
               {{- $capitalizeTitles := $page.Param "capitalizeTitles" -}}
               {{- $title := cond $capitalizeTitles (title $page.LinkTitle) $page.LinkTitle -}}
-              {{- if $page.LinkTitle | eq $.LinkTitle -}}
-                {{- $currentKey = $key -}}
-                <li class="collection-item"><span class="active" title="{{ $title }}">{{ $title }}</span></li>
-              {{- else }}
-                <li class="collection-item"><a href="{{ $page.RelPermalink }}" title="{{ $title }}">{{ $title }}</a></li>
-              {{- end }}
+              <li class="collection-item">
+                {{- if $.Eq $page -}}
+                  {{- $currentKey = $key -}}
+                  <span class="active" title="{{ $title }}">{{ $title }}</span>
+                {{- else -}}
+                  <a href="{{ $page.RelPermalink }}" title="{{ $title }}">{{ $title }}</a>
+                {{- end -}}
+              </li>
             {{- end -}}
           </ul>
           <div class="collection-nav-simple">

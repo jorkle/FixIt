@@ -5,6 +5,20 @@
   {{- end -}}
 {{- end -}}
 
+{{- define "custom-menu:desktop" -}}
+  {{- $ctx := . -}}
+  {{- range .Site.Params.customPartials.menuDesktop -}}
+    {{- partial . $ctx -}}
+  {{- end -}}
+{{- end -}}
+
+{{- define "custom-menu:mobile" -}}
+  {{- $ctx := . -}}
+  {{- range .Site.Params.customPartials.menuMobile -}}
+    {{- partial . $ctx -}}
+  {{- end -}}
+{{- end -}}
+
 {{- define "custom-profile" -}}
   {{- $ctx := . -}}
   {{- range .Site.Params.customPartials.profile -}}
@@ -43,6 +57,34 @@
 {{- define "custom-assets" -}}
   {{- $ctx := . -}}
   {{- range .Site.Params.customPartials.assets -}}
+    {{- partial . $ctx -}}
+  {{- end -}}
+{{- end -}}
+
+{{- define "custom-post__toc:before" -}}
+  {{- $ctx := . -}}
+  {{- range .Site.Params.customPartials.postTocBefore -}}
+    {{- partial . $ctx -}}
+  {{- end -}}
+{{- end -}}
+
+{{- define "custom-post__toc:after" -}}
+  {{- $ctx := . -}}
+  {{- range .Site.Params.customPartials.postTocAfter -}}
+    {{- partial . $ctx -}}
+  {{- end -}}
+{{- end -}}
+
+{{- define "custom-post__content:before" -}}
+  {{- $ctx := . -}}
+  {{- range .Site.Params.customPartials.postContentBefore -}}
+    {{- partial . $ctx -}}
+  {{- end -}}
+{{- end -}}
+
+{{- define "custom-post__content:after" -}}
+  {{- $ctx := . -}}
+  {{- range .Site.Params.customPartials.postContentAfter -}}
     {{- partial . $ctx -}}
   {{- end -}}
 {{- end -}}

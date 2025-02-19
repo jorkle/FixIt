@@ -1,27 +1,26 @@
 # Translations for Serbian
 # Превод на Српски
 # https://gohugo.io/content-management/multilingual/#translation-of-strings
-# TODO Some fields are waiting for your translation
 
 # === init ===
 [init]
-configurationError = ""
-compatibilityError = ""
-devVersionWarn = ""
-devEnvWarn = ""
-quicklyUpgrade = ""
+configurationError = "Грешка у конфигурацији\nНисте правилно конфигурисали параметар верзије FixIt. Погледајте https://fixit.lruihao.cn/documentation/basics/#theme-configuration"
+compatibilityError = "Грешка у компатибилности ({{ .From }} -> {{ .To }}):\nИмате некомпатибилно ажурирање. Погледајте https://github.com/hugo-fixit/FixIt/releases"
+devVersionWarn = "Користите развојну верзију FixIt. Размотрите коришћење стабилне верзије.\nПогледајте https://github.com/hugo-fixit/FixIt/releases"
+devEnvWarn = "Тренутно окружење је \"развојно\". \"Систем коментара\", \"PWA\", \"CDN\", \"отисак прста\" и \"аналитика\" ће бити онемогућени."
+quicklyUpgrade = "Брзо ажурирање користите команду: "
 # === init ===
 
 # === baseof ===
 [baseof]
 backToTop = "Назад на Врх"
 viewComments = "Погледај Коментаре"
-noscript = ""
+noscript = "Овај сајт најбоље ради са омогућеним JavaScript-ом."
 # === baseof ===
 
 # === Taxonomy ===
 [archives]
-other = ""
+other = "Остало"
 
 [allSome]
 other = "Све {{ .Some }}"
@@ -33,10 +32,10 @@ other = "Категорија"
 other = "Категорије"
 
 [collection]
-other = ""
+other = "Collection"
 
 [collections]
-other = ""
+other = "Collections"
 
 [tag]
 other = "Таг"
@@ -53,12 +52,12 @@ other = "Постови"
 recentlyUpdated = "Недавно Ажурирано"
 
 [section.totalWordCount]
-one = ""
-other = ""
+one = "Једна реч"
+other = "Укупно {{ .Count }} речи"
 
 [section.archiveCounter]
-one = ""
-other = ""
+one = "Само један чланак"
+other = "{{ .Count }} чланака укупно"
 # === Section ===
 
 # === Pagination ===
@@ -92,6 +91,8 @@ facebookLanguageCode = "sr_RS"
 [assets]
 search = "Претрага"
 searchPlaceholder = "Претражи наслове или садржај..."
+searchIn = "Претражи у {{ . }}"
+gotoResultsPage = "Иди на страницу резултата претраге ..."
 clear = "Очисти"
 cancel = "Поништи"
 noResultsFound = "Без резултата"
@@ -111,26 +112,26 @@ other = "Подели на"
 # === posts/single.html ===
 [single]
 contents = "Садржаји"
-pin = ""
-repost = ""
+pin = "Закачи"
+repost = "Поново објави"
 publishedOnDate = "објављено {{ .Date }}"
 views = "прегледа"
 comments = "коментари"
 author = "Аутор"
 updatedOnDate = "Ажурирано {{ .Date }}"
 readMarkdown = "Читај Markdown"
-viewSource = ""
+viewSource = "Погледај извор"
 editThisPage = "Уреди ову страницу"
-reportIssue = ""
+reportIssue = "Пријави проблем"
 back = "Назад"
 home = "Почетна"
 readMore = "Прочитај више"
 expirationReminder = "Овај чланак је последњи пут ажуриран {{ .Date }}, садржај је можда застарео."
-encryptedAbstract = ""
-encryptedMessage = ""
+encryptedAbstract = "Овај чланак је шифрован."
+encryptedMessage = "Унесите лозинку да бисте видели садржај."
 password = "Паролица"
-enterBtn = ""
-encryptyAgain = ""
+enterBtn = "Унеси"
+encryptyAgain = "Поново шифруј"
 relatedContent = "Повезани садржај"
 
 [single.includedIn]
@@ -150,11 +151,11 @@ one = "Један минут"
 other = "{{ .Count }} минута"
 
 [single.reward]
-donate = ""
-wechatpay = ""
-alipay = ""
-paypal = ""
-bitcoin = ""
+donate = "Донирај"
+wechatpay = "WeChat Pay"
+alipay = "Alipay"
+paypal = "PayPal"
+bitcoin = "Bitcoin"
 # === posts/single.html ===
 
 # === 404.html ===
@@ -175,18 +176,31 @@ other = "Нисте повезани на Интернет, биће досту�
 
 # === GitHub Alert ===
 [alert]
-note = ""
-tip = ""
-important = ""
-warning = ""
-caution = ""
+note = "Напомена"
+tip = "Савет"
+important = "Важно"
+warning = "Упозорење"
+caution = "Опрез"
 # === GitHub Alert ===
+
+# === Task lists ===
+[taskList]
+" " = "Непроверено"
+"x" = "Проверено"
+"/" = "У току"
+"-" = "Отказано"
+"<" = "Планирано"
+">" = "Преустановљено"
+"!" = "Важно"
+"?" = "Питање"
+# === Task lists ===
 
 # === shortcodes/admonition.html ===
 [admonition]
 note = "Напомена"
 abstract = "Сажетак"
 info = "Инфо"
+todo = "То-до"
 tip = "Савет"
 success = "Успех"
 question = "Питање"

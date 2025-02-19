@@ -124,6 +124,21 @@ class FixIt {
     const $searchToggle = document.getElementById(`search-toggle-${suffix}`);
     const $searchLoading = document.getElementById(`search-loading-${suffix}`);
     const $searchClear = document.getElementById(`search-clear-${suffix}`);
+    const $searchCancel = document.getElementById('search-cancel-mobile');
+
+    // goto the PostChat panel rather than search results
+    if (searchConfig.type === 'post-chat' && window.postChatUser) {
+      if (isMobile) {
+        $searchInput.addEventListener('focus', () => {
+          window.postChatUser.setSearchInput('');
+        }, false);
+      } else {
+        $searchToggle.addEventListener('click', () => {
+          window.postChatUser.setSearchInput('');
+        }, false);
+      }
+      return;      
+    }
 
     if (isMobile) {
       this._searchMobileOnce = true;
@@ -132,7 +147,7 @@ class FixIt {
         document.body.classList.add('blur');
         $header.classList.add('open');
       }, false);
-      document.getElementById('search-cancel-mobile').addEventListener('click', () => {
+      $searchCancel.addEventListener('click', () => {
         this.disableScrollEvent = false;
         $header.classList.remove('open');
         document.body.classList.remove('blur');
@@ -159,8 +174,10 @@ class FixIt {
         document.body.classList.add('blur');
         $header.classList.add('open');
         $searchInput.focus();
+        this.disableScrollEvent = true;
       }, false);
       $searchClear.addEventListener('click', () => {
+        this.disableScrollEvent = false;
         $searchClear.style.display = 'none';
         this._searchDesktop && this._searchDesktop.autocomplete.setVal('');
       }, false);
@@ -289,25 +306,49 @@ class FixIt {
                     finish([]);
                   });
               } else finish(search());
-            }            
+            } else if (searchConfig.type === 'cse') {
+              const cseConfig = this.config.cse;
+              if (cseConfig.engine === 'google' && cseConfig.cx) {
+                finish([{
+                  uri: `${cseConfig.resultsPage}#gsc.tab=0&gsc.q=${encodeURIComponent(query)}`,
+                  title: cseConfig.searchIn,
+                  date: '<i class="fa-brands fa-searchengin fa-xl" aria-hidden="true"></i>',
+                  context: cseConfig.gotoResultsPage
+                }]);
+              }
+            } else {
+              finish([]);
+            }
           },
           templates: {
             suggestion: ({ title, date, context }) =>
               `<div><span class="suggestion-title">${title}</span><span class="suggestion-date">${date}</span></div><div class="suggestion-context">${context}</div>`,
             empty: ({ query }) => `<div class="search-empty">${searchConfig.noResultsFound}: <span class="search-query">"${query}"</span></div>`,
             footer: ({}) => {
-              const { searchType, icon, href } =
-                searchConfig.type === 'algolia'
-                  ? {
-                      searchType: 'algolia',
-                      icon: '<i class="fa-brands fa-algolia fa-fw" aria-hidden="true"></i>',
-                      href: 'https://www.algolia.com/'
-                    }
-                  : {
-                      searchType: 'Fuse.js',
-                      icon: '',
-                      href: 'https://fusejs.io/'
-                    }
+              let searchType, icon, href;
+              switch (searchConfig.type) {
+                case 'algolia':
+                  searchType = 'algolia';
+                  icon = '<i class="fa-brands fa-algolia fa-fw" aria-hidden="true"></i>';
+                  href = 'https://www.algolia.com/';
+                  break;
+                case 'fuse':
+                  searchType = 'Fuse.js';
+                  icon = '';
+                  href = 'https://fusejs.io/';
+                  break;
+                case 'cse':
+                  if (this.config.cse.engine === 'google') {
+                    searchType = 'Google CSE';
+                    icon = '<i class="fa-brands fa-google fa-fw" aria-hidden="true"></i>';
+                    href = 'https://programmablesearchengine.google.com/';
+                  }
+                  break;
+                default:
+                  searchType = '';
+                  icon = '';
+                  href = '';
+              }
               return `<div class="search-footer">Search by <a href="${href}" rel="noopener noreferrer" target="_blank">${icon} ${searchType}</a></div>`;
             }
           }
@@ -334,7 +375,7 @@ class FixIt {
   }
 
   initDetails(target = document) {
-    this.util.forEach(target.getElementsByClassName('details'), ($details) => {
+    this.util.forEach(target.querySelectorAll('.details:not(.disabled)'), ($details) => {
       const $summary = $details.querySelector('.details-summary');
       $summary.addEventListener('click', () => {
         $details.classList.toggle('open');
@@ -464,7 +505,7 @@ class FixIt {
           }
           $copy.title = this.config.code.copyTitle;
           $copy.addEventListener('click', () => {
-            navigator.clipboard.writeText(code).then(() => {
+            this.util.copyText(code).then(() => {
               this.util.animateCSS($code, 'animate__flash');
             }, () => {
               console.error('Clipboard write failed!', 'Your browser does not support clipboard API!');
@@ -601,11 +642,11 @@ class FixIt {
   }
 
   initMermaid() {
-    if (!window.mermaid?.initialize) {
+    if (!this.config.mermaid) {
       return;
     }
     const _initializeAndRun = () => {
-      const themes = window.mermaid.themes ?? ['default', 'dark'];
+      const themes = this.config.mermaid.themes ?? ['default', 'dark'];
       window.mermaid.initialize({
         securityLevel: 'loose',
         startOnLoad: false,
@@ -914,13 +955,17 @@ class FixIt {
         document.querySelector('.giscus-frame')?.contentWindow.postMessage({ giscus: message }, giscusConfig.origin);
       });
       this.switchThemeEventSet.add(this._giscusOnSwitchTheme);
-      this.giscus2parentMsg = window.addEventListener('message', (event) => {
+      // gicuss to parent message
+      this._messageListener = (event) => {
+        if (event.origin !== giscusConfig.origin) return;
         const $script = document.querySelector('#giscus>script');
         if ($script){
-          this._giscusOnSwitchTheme();
           $script.parentElement.removeChild($script);
         }
-      }, { once: true });
+        this._giscusOnSwitchTheme()
+        window.removeEventListener('message', this._messageListener, false);
+      };
+      window.addEventListener('message', this._messageListener, false);
       return;
     }
   }
@@ -999,6 +1044,8 @@ class FixIt {
     }
     const selector = this.config.pangu.selector;
     if (selector) {
+      // to avoid extra spaces for extended Markdown syntax fraction in Chinese
+      pangu.ignoredTags = /^(script|code|pre|textarea|sup|sub)$/i;
       if (selector.startsWith('#')) {
         pangu.spacingElementById(selector.slice(1));
       } else if (selector.startsWith('.')) {
@@ -1102,6 +1149,21 @@ class FixIt {
       }, false)
     });
     this.scrollEventSet.add(_closeRewardExclude);
+  }
+
+  initPostChatUser() {
+    if (!window.postChatUser || !postChatConfig || postChatConfig.userMode === 'magic') {
+      return;
+    }
+    postChat_theme = this.isDark ? 'dark' : 'light';
+    this.switchThemeEventSet.add((isDark) => {
+      const targetFrame = document.getElementById("postChat_iframeContainer")
+      if (targetFrame) {
+        window.postChatUser.setPostChatTheme(isDark ? 'dark' : 'light');
+      } else {
+        postChat_theme  = isDark ? 'dark' : 'light';
+      }
+    });
   }
 
   onScroll() {
@@ -1243,6 +1305,7 @@ class FixIt {
       this.initWatermark();
       this.initAutoMark();
       this.initReward();
+      this.initPostChatUser();
 
       window.setTimeout(() => {
         this.initComment();

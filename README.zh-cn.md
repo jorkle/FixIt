@@ -1,20 +1,33 @@
 <!-- markdownlint-disable-file MD033 MD041 -->
 ![Hugo Theme FixIt](https://fixit.lruihao.cn/images/apple-devices-preview.png)
 
-<div align="center"><a href="README.md">English</a> | 简体中文</div>
+<div align="center" class="ignore">
+  <p>
+    FixIt 是一个简洁、优雅且高效的 <a href="https://gohugo.io/">Hugo</a> 博客主题。<br>
+    <em><sub>如果你喜欢这个主题，别忘了留下一颗 ⭐️ 哦，谢谢！</sub></em>
+  </p>
+  <a href="/README.md">English</a> |
+  简体中文 |
+  <a href="https://fixit.lruihao.cn/zh-cn/ecosystem/hugo-fixit/fixit/?lang=chinese_traditional">繁體中文</a> |
+  <a href="https://fixit.lruihao.cn/ecosystem/hugo-fixit/fixit/?lang=french">Français</a> |
+  <a href="https://fixit.lruihao.cn/ecosystem/hugo-fixit/fixit/?lang=russian">Русский язык</a> |
+  <a href="https://fixit.lruihao.cn/ecosystem/hugo-fixit/fixit/?lang=spanish">Español</a> |
+  <a href="https://fixit.lruihao.cn/ecosystem/hugo-fixit/fixit/?lang=hindi">हिन्दी</a> |
+  <a href="https://fixit.lruihao.cn/ecosystem/hugo-fixit/fixit/?lang=german">deutsch</a> |
+  <a href="https://fixit.lruihao.cn/ecosystem/hugo-fixit/fixit/?lang=korean">한국어</a> |
+  <a href="https://fixit.lruihao.cn/ecosystem/hugo-fixit/fixit/?lang=japanese">しろうと</a>
+</div>
 
 <a title="FixIt 官网" href="https://fixit.lruihao.cn/zh-cn/"><img align="right" alt="FixIt logo" width="70" height="70" src="https://avatars.githubusercontent.com/u/110414864?s=200&v=4"></a>
 
 # FixIt
 
+> 它的原型基于 [LoveIt](https://github.com/dillonzq/LoveIt) 主题，[KeepIt](https://github.com/Fastbyte01/KeepIt) 主题和 [LeaveIt](https://github.com/liuzc/LeaveIt) 主题。
+
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/hugo-fixit/FixIt?style=flat)](https://github.com/hugo-fixit/FixIt/releases)
-[![Hugo](https://img.shields.io/badge/Hugo-%5E0.132.0-ff4088?style=flat&logo=hugo)](https://gohugo.io/)
+[![Hugo](https://img.shields.io/badge/Hugo-%5E0.141.0-ff4088?style=flat&logo=hugo)](https://gohugo.io/)
 [![License](https://img.shields.io/github/license/hugo-fixit/FixIt?style=flat)](/LICENSE)
 [![Open Source Love](https://badges.frapsoft.com/os/v1/open-source.svg?v=103)](https://github.com/hugo-fixit/FixIt)
-
-> «FixIt» 是一个**简洁**、**优雅**且**高效**的 [Hugo](https://gohugo.io/) 博客主题。
-
-它的原型基于 [LoveIt](https://github.com/dillonzq/LoveIt) 主题，[KeepIt](https://github.com/Fastbyte01/KeepIt) 主题和 [LeaveIt](https://github.com/liuzc/LeaveIt) 主题。
 
 ## 即时预览
 
@@ -22,25 +35,43 @@
   💟 <a href="https://fixit.lruihao.cn/zh-cn/">Production</a> | ❇️ <a href="https://pre.fixit.lruihao.cn/zh-cn/">Preview</a> | 🚼 <a href="https://demo.fixit.lruihao.cn">Demo</a> | 🆕 <a href="https://hugo-fixit.github.io/hugo-fixit-starter/">Starter</a>
 <br>
 <br>
-  更多 «FixIt» 的例子参见 <a href="https://fixit.lruihao.cn/zh-cn/showcase/">这里</a>。
+  更多 FixIt 的例子参见 <a href="https://fixit.lruihao.cn/zh-cn/showcase/">这里</a>。
 </p>
 
-## 主题文档
+## 为什么选择 FixIt
+
+我也不知道为什么 🤷。
+
+<!-- 懒的写…… -->
+
+## 使用指南
+
+### 主题文档
 
 前往 [快速上手](https://fixit.lruihao.cn/zh-cn/documentation/getting-started/quick-start/) 页面，了解如何使用 FixIt 主题创建一个新网站的详细步骤。
 
 大纲：[安装篇](https://fixit.lruihao.cn/zh-cn/documentation/installation/) ➜ [入门篇](https://fixit.lruihao.cn/zh-cn/documentation/getting-started/) ➜ [内容管理](https://fixit.lruihao.cn/zh-cn/documentation/content-management/) ➜ [进阶篇](https://fixit.lruihao.cn/zh-cn/documentation/advanced/)
 
-## 模板仓库
+### 快速开始
+
+我们提供了一个 CLI 工具，可以通过一个命令来创建一个新的 FixIt 项目。
+
+```bash
+pnpx fixit-cli create my-blog
+```
+
+[![asciicast](https://asciinema.org/a/697494.svg)](https://asciinema.org/a/697494)
+
+### 模板
 
 点击以下链接使用模板生成一个新的仓库：
 
-| 模板仓库                                   | 生成链接                          |
-| :----------------------------------------- | :-------------------------------: |
-| [hugo-fixit/hugo-fixit-starter][starter]   | [点击生成][starter:generate]      |
-| [hugo-fixit/hugo-fixit-starter1][starter1] | [点击生成][starter1:generate]     |
-| [hugo-fixit/docs][docs]                    | [点击生成][docs:generate]         |
-| [Lruihao/hugo-blog][lruihao-blog]          | [点击生成][lruihao-blog:generate] |
+| 模板                                | 仓库                              | 生成链接                          |
+| :---------------------------------- | :-------------------------------- | :-------------------------------: |
+| 基于 Hugo Modules 的快速入门模板。  | [hugo-fixit-starter][starter]     | [点击生成][starter:generate]      |
+| 基于 Git submodule 的快速入门模板。 | [hugo-fixit-starter1][starter1]   | [点击生成][starter1:generate]     |
+| 使用 Fixit 主题构建多语言网站。     | [docs][docs]                      | [点击生成][docs:generate]         |
+| 基于 FixIt 主题进行自定义设置。     | [Lruihao/hugo-blog][lruihao-blog] | [点击生成][lruihao-blog:generate] |
 
 [starter]: https://github.com/hugo-fixit/hugo-fixit-starter
 [starter:generate]: https://github.com/hugo-fixit/hugo-fixit-starter/generate
@@ -51,9 +82,14 @@
 [lruihao-blog]: https://github.com/Lruihao/hugo-blog
 [lruihao-blog:generate]: https://github.com/Lruihao/hugo-blog/generate
 
-<!-- ## 为什么选择 FixIt -->
+### 镜像
 
-## 特性
+Gitee 镜像仓库：<https://gitee.com/lruihao/FixIt>
+
+## 特色
+
+<details>
+<summary>点击展开</summary>
 
 ### 性能和 SEO
 
@@ -61,6 +97,11 @@
 - 使用基于 JSON-LD 格式 的 **SEO SCHEMA** 文件进行 SEO 优化
 - 支持 **[Google Analytics](https://analytics.google.com/analytics)**
 - 支持 **[Fathom Analytics](https://usefathom.com/)**
+- 支持 **[百度统计](https://tongji.baidu.com/)**
+- 支持 **[Umami Analytics](https://umami.is/)**
+- 支持 **[Plausible Analytics](https://plausible.io/)**
+- 支持 **[Cloudflare Web Analytics](https://www.cloudflare.com/web-analytics)**
+- 支持 **[Splitbee Analytics](https://splitbee.io)**
 - 支持搜索引擎的**网站验证** (Google, Bing, Yandex, Pinterest, Baidu, 360 and Sogou)
 - 支持所有第三方库的 **CDN**
 
@@ -94,11 +135,13 @@
 
 ### 扩展功能
 
+- 支持基于 [PostChat](https://ai.tianli0.top/?InviteID=IRE1S88Z) 的 **AI 摘要**、**AI 搜索** 和 **AI 智能客服**
 - 支持**渐进式网页应用**
 - 支持**二级菜单**
 - 支持**内容加密**（页面、局部）
 - 支持**友情链接**的页面模板
-- 支持基于 [algolia](https://www.algolia.com/) 或 [Fuse.js](https://fusejs.io/) 的**搜索**
+- 支持基于 [algolia](https://www.algolia.com/)、[Fuse.js](https://fusejs.io/)、 **CSE** 或 [PostChat](https://ai.tianli0.top/?InviteID=IRE1S88Z) 的**搜索**
+- 支持基于 [Google](https://programmablesearchengine.google.com/) 的**自定义搜索引擎 (CSE)**
 - 支持 **Twemoji**
 - 支持**代码高亮**
 - 一键**复制代码**到剪贴板
@@ -124,13 +167,14 @@
 - 支持本地**缓存远程图床图片**
 - ……
 
-### 主题组件
-
-FixIt 主题旨在在**简洁性**和**可扩展性**之间取得平衡。为此，我们开发了一系列额外的 [Hugo 主题组件](https://fixit.lruihao.cn/zh-cn/components/) 供用户选择。
+</details>
 
 ## 多语言和国际化
 
-FixIt 支持下列语言：
+FixIt 主题多语言基本配置及自动翻译等详见 [内容管理](https://fixit.lruihao.cn/zh-cn/documentation/content-management/introduction#multilingual) 文档，欢迎 [贡献一种新的语言](https://github.com/hugo-fixit/FixIt/pulls)。
+
+<details>
+<summary>FixIt 支持下列语言。</summary>
 
 - 英语
 - 简体中文
@@ -146,13 +190,44 @@ FixIt 支持下列语言：
 - 罗马尼亚语
 - 越南语
 - 印地语
-- [贡献一种新的语言](https://github.com/hugo-fixit/FixIt/pulls)
 
-[语言兼容性](https://fixit.lruihao.cn/zh-cn/theme-documentation-basics/#language-compatibility)
+</details>
 
-## 镜像
+## 主题组件
 
-Gitee 镜像仓库：<https://gitee.com/lruihao/FixIt>
+FixIt 主题旨在在**简洁性**和**可扩展性**之间取得平衡。为此，我们开发了一系列额外的 [Hugo 主题组件](https://fixit.lruihao.cn/zh-cn/ecosystem/#-组件) 供用户选择。
+
+<details>
+<summary>点击展开</summary>
+
+<!-- HUGO_FIXIT_COMPONENTS:START -->
+- [fixit-bundle](https://github.com/hugo-fixit/fixit-bundle)\
+  🌲 Bundles the FixIt core theme and all hugo-fixit components into a single component.
+- [cmpt-flyfish](https://github.com/hugo-fixit/cmpt-flyfish)\
+  🐟 一个 canvas 实现的小鱼游动动画效果。
+- [cmpt-mdevtools](https://github.com/hugo-fixit/cmpt-mdevtools)\
+  Mobile devtools component powered by vConsole and eruda.
+- [cmpt-translate](https://github.com/hugo-fixit/cmpt-translate)\
+  🌐 A component for site automatic translation.
+- [component-projects](https://github.com/hugo-fixit/component-projects)\
+  🐙 Display your GitHub projects in the FixIt theme and generate blog posts from readme.
+- [hugo-atom-feed](https://github.com/hugo-fixit/hugo-atom-feed)\
+  Hugo theme component for ATOM feed custom Output Format.
+- [hugo-json-feed](https://github.com/hugo-fixit/hugo-json-feed)\
+  Hugo theme component for JSON feed custom Output Format.
+- [shortcode-asciinema](https://github.com/hugo-fixit/shortcode-asciinema)\
+  A Hugo theme component with asciinema-embed shortcode.
+- [shortcode-caniuse](https://github.com/hugo-fixit/shortcode-caniuse)\
+  一个含有 caniuse shortcode 的 Hugo 主题组件。
+- [shortcode-docs-bookmark](https://github.com/hugo-fixit/shortcode-docs-bookmark)\
+  🔖 Embed bookmark of FixIt Docs.
+- [shortcode-mmt-netease](https://github.com/hugo-fixit/shortcode-mmt-netease)\
+  🎶 A Hugo theme component with a NetEase Cloud random comment shortcode.
+- [shortcode-rewards](https://github.com/hugo-fixit/shortcode-rewards)\
+  A Hugo theme component with reward-log or sponsor-log shortcode.
+<!-- HUGO_FIXIT_COMPONENTS:END -->
+
+</details>
 
 ## 社区支持
 
@@ -165,8 +240,6 @@ Gitee 镜像仓库：<https://gitee.com/lruihao/FixIt>
 | [FixIt 主题交流群（QQ）][qq-group] | QQ 群：`814031017`              |
 | [Hugo FixIt 星球][zsxq]            | 付费知识星球                    |
 
-如果你喜欢这个主题，别忘了留下一颗 ⭐️ 哦，谢谢！
-
 [discussions]: https://github.com/hugo-fixit/FixIt/discussions
 [pulls]: https://github.com/hugo-fixit/FixIt/pulls
 [issues]: https://github.com/hugo-fixit/FixIt/issues
@@ -176,7 +249,7 @@ Gitee 镜像仓库：<https://gitee.com/lruihao/FixIt>
 
 ## 参与贡献
 
-我们欢迎你加入 FixIt 的开发，贡献出你的一份力量。请看开源 [贡献指南](CONTRIBUTING.md)。 🤗
+我们欢迎你加入 FixIt 的开发，贡献出你的一份力量。请看开源 [贡献指南](/CONTRIBUTING.md)。 🤗
 
 你也可以随时向我们的 [官方插件](https://github.com/hugo-fixit) 提交 Issue 或 Pull Request。
 
@@ -237,15 +310,19 @@ Gitee 镜像仓库：<https://gitee.com/lruihao/FixIt>
 
 ## 许可协议
 
-FixIt 根据 **MIT** 许可协议授权。更多信息请查看 [LICENSE 文件](LICENSE)。
+FixIt 根据 **MIT** 许可协议授权。更多信息请查看 [LICENSE 文件](/LICENSE)。
 
 ## 赞助支持
 
 如果你喜爱这个主题，请考虑给我买杯咖啡 ☕️，谢谢！
 
-- [微信支付](images/wechatpay.jpg)
-- [支付宝](images/alipay.jpg)
+- [微信支付](/images/wechatpay.jpg)
+- [支付宝](/images/alipay.jpg)
 - [PayPal](https://paypal.me/Lruihao)
+
+感谢以下赞助商提供大力支持：
+
+- [translate.js](https://github.com/xnx3/translate) 赞助[企业级翻译通道](https://translate.zvo.cn/4087.html)。
 
 ## 作者
 

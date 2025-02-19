@@ -1,7 +1,11 @@
 :root {
   // Note: Custom variable values only support SassScript inside `#{}`.
+  // TODO migrate SCSS variables to CSS variables
 
-  // Theme colors varibles
+  --#{$prefix}global-font-color: #{$global-font-color};
+  --#{$prefix}global-border-color: #{$global-border-color};
+
+  // Theme colors variables
   @each $color, $value in $theme-colors {
     --#{$prefix}#{$color}: #{$value};
   }
@@ -26,6 +30,9 @@
 
 // Dark theme
 [data-theme=dark] {
+  --#{$prefix}global-font-color: #{$global-font-color-dark};
+  --#{$prefix}global-border-color: #{$global-border-color-dark};
+
   @each $color, $value in $theme-colors {
     --#{$prefix}#{$color}: #{darken($value, 5%)};
   }

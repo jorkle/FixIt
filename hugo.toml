@@ -135,7 +135,7 @@ enableEmoji = true
 [module]
   [module.hugoVersion]
     extended = true
-    min = "0.132.0"
+    min = "0.141.0"
 
 # -------------------------------------------------------------------------------------
 # Markup related configuration in Hugo
@@ -178,8 +178,13 @@ enableEmoji = true
           enable = true
         [markup.goldmark.extensions.extras.superscript]
           enable = true
-    # TODO passthrough refactor https://gohugo.io/getting-started/configuration-markup/#parserattributeblock
+    # TODO passthrough refactor https://gohugo.io/render-hooks/passthrough/
     # TODO hugo 0.122.0 https://gohugo.io/content-management/mathematics/
+    # [markup.goldmark.extensions.passthrough]
+    #   enable = true
+    #   [markup.goldmark.extensions.passthrough.delimiters]
+    #     block = [['\[', '\]'], ['$$', '$$']]
+    #     inline = [['\(', '\)'], ['$', '$']]
     [markup.goldmark.parser]
       [markup.goldmark.parser.attribute]
         block = true
@@ -197,6 +202,7 @@ enableEmoji = true
 
 [sitemap]
   changefreq = "weekly"
+  disable = false
   filename = "sitemap.xml"
   priority = 0.5
 
@@ -339,6 +345,8 @@ enableEmoji = true
   # FixIt 0.3.0 | NEW whether to add site subtitle to the title of index page
   # remember to set up your site subtitle by `params.header.subtitle.name`
   indexWithSubtitle = false
+  # FixIt 0.3.13 | NEW whether to show summary in plain text
+  summaryPlainify = false
   # FixIt 0.2.14 | NEW FixIt will, by default, inject a theme meta tag in the HTML head on the home page only.
   # You can turn it off, but we would really appreciate if you don’t, as this is a good way to watch FixIt's popularity on the rise.
   disableThemeInject = false
@@ -381,7 +389,7 @@ enableEmoji = true
   # Search config
   [params.search]
     enable = false
-    # type of search engine ["algolia", "fuse"]
+    # type of search engine ["algolia", "fuse", "cse", "post-chat"]
     type = "fuse"
     # max index length of the chunked content
     contentLength = 4000
@@ -410,6 +418,19 @@ enableEmoji = true
       ignoreLocation = false
       useExtendedSearch = false
       ignoreFieldNorm = false
+
+  # FixIt 0.3.16 | NEW Custom Search Engine (CSE)
+  [params.cse]
+    # Search Engine: ["google", "bing"]
+    engine = ""
+    # Search results page URL (layout: search)
+    resultsPage = "/search/"
+    # Google: https://programmablesearchengine.google.com/
+    # Google Custom Search Engine Context
+    [params.cse.google]
+      cx = ""
+    # Bing (Unsupported): https://www.customsearch.ai/
+    [params.cse.bing]
 
   # Header config
   [params.header]
@@ -506,13 +527,6 @@ enableEmoji = true
       limit = -1
       # whether to show the full text content in feed.
       fullText = false
-    # FixIt 0.2.13 | NEW recently updated pages config
-    # TODO refactor to support archives, section, taxonomy and term
-    [params.section.recentlyUpdated]
-      enable = false
-      rss = false
-      days = 30
-      maxCount = 10
 
   # Term list (category or tag) page config
   [params.list]
@@ -526,6 +540,14 @@ enableEmoji = true
       limit = -1
       # whether to show the full text content in feed.
       fullText = false
+
+  # FixIt 0.3.13 | NEW recently updated pages config for archives, section and term list
+  [params.recentlyUpdated]
+    archives = true
+    section = true
+    list = true
+    days = 30
+    maxCount = 10
 
   # FixIt 0.2.17 | NEW TagCloud config for tags page
   [params.tagcloud]
@@ -649,6 +671,7 @@ enableEmoji = true
     Douyin = ""
     TikTok = ""
     Credly = ""
+    Bluesky = ""
     Phone = ""
     Email = ""
     RSS = true
@@ -678,6 +701,25 @@ enableEmoji = true
   [params.mermaid]
     # For values, see https://mermaid.js.org/config/theming.html#available-themes
     themes = ["default", "dark"]
+
+  # FixIt 0.3.13 | NEW Admonitions custom config
+  # See https://fixit.lruihao.cn/documentation/content-management/shortcodes/extended/admonition/#custom-admonitions
+  # syntax: <type> = <icon>
+  [params.admonition]
+    # ban = "fa-solid fa-ban"
+  
+  # FixIt 0.3.14 | NEW Task lists custom config
+  # See https://fixit.lruihao.cn/documentation/content-management/advanced/#custom-task-lists
+  # syntax: <sign> = <icon>
+  [params.taskList]
+    # tip = "fa-regular fa-lightbulb"
+
+  # FixIt 0.3.15 | NEW version shortcode config
+  [params.repoVersion]
+    # url prefix for the release tag
+    url = "https://github.com/hugo-fixit/FixIt/releases/tag/v"
+    # project name
+    name = "FixIt"
 
   # FixIt 0.2.12 | NEW PanguJS config
   [params.pangu]
@@ -749,6 +791,31 @@ enableEmoji = true
       id = ""
       # server url for your tracker if you're self hosting
       server = ""
+    # FixIt 0.3.16 | NEW Baidu Analytics
+    [params.analytics.baidu]
+      id = ""
+    # FixIt 0.3.16 | NEW Umami Analytics
+    [params.analytics.umami]
+      data_website_id = ""
+      src = ""
+      data_host_url = ""
+      data_domains = ""
+    # FixIt 0.3.16 | NEW Plausible Analytics
+    [params.analytics.plausible]
+      data_domain = ""
+      src = ""
+    # FixIt 0.3.16 | NEW Cloudflare Analytics
+    [params.analytics.cloudflare]
+      token = ""
+    # FixIt 0.3.16 | NEW Splitbee Analytics
+    [params.analytics.splitbee]
+      enable = false
+      # no cookie mode
+      no_cookie = true
+      # respect the do not track setting of the browser
+      do_not_track = true
+      # token(optional), more info on https://splitbee.io/docs/embed-the-script
+      data_token = ""
 
   # Cookie consent config
   [params.cookieconsent]
@@ -768,7 +835,8 @@ enableEmoji = true
 
   # Compatibility config
   [params.compatibility]
-    # whether to use Polyfill.io to be compatible with older browsers
+    # whether to use Polyfill.io on cdnjs to be compatible with older browsers
+    # https://cdnjs.cloudflare.com/polyfill
     polyfill = false
     # whether to use object-fit-images to be compatible with older browsers
     objectFit = false
@@ -818,6 +886,53 @@ enableEmoji = true
     # "corner-indicator", "fill-left", "flash", "flat-top", "loading-bar", "mac-osx", "material", "minimal"]
     theme = "minimal"
   
+  # FixIt 0.3.17 | NEW PostChat AI config
+  # Based on your posts to build a knowledge base, support AI summary, AI search, and AI Chatbot.
+  # Get PostChat Key from my invitation link, thanks for your support!
+  # https://ai.tianli0.top/?InviteID=IRE1S88Z
+  [params.postChat]
+    enable = false
+    key = ""
+    # How users initiate chats: ["iframe", "magic"]
+    userMode = "iframe"
+    addButton = true
+    defaultInput = false
+    left = ""
+    bottom = ""
+    width = ""
+    height = ""
+    fill = ""
+    backgroundColor = ""
+    upLoadWeb = true
+    showInviteLink = true
+    userTitle = ""
+    userDesc = ""
+    # dom container to be blacked out, e.g. [".aplayer"]
+    blackDom = []
+    # Only for iframe mode
+    frameWidth = ""     # e.g. "375px"
+    frameHeight = ""    # e.g. "600px"
+    # only for magic mode
+    userIcon = ""
+    defaultChatQuestions = []
+    defaultSearchQuestions = []
+
+  # FixIt 0.3.17 | NEW Summary AI config
+  # See https://postchat.zhheo.com/summary.html
+  [params.postSummary]
+    enable = false
+    # If you set `params.postChat.key`, you don't need to set `params.postSummary.key`
+    key = ""
+    title = ""
+    # themes options: ["", "simple", "yanzhi"]
+    theme = ""
+    postURL = ""
+    blacklist = ""
+    wordLimit = 1000
+    typingAnimate = true
+    beginningText = ""
+    loadingText = true
+
   # FixIt 0.3.10 | NEW Global Feed config for RSS, Atom and JSON feed.
   [params.feed]
     # The number of posts to include in the feed. If set to -1, all posts.
@@ -834,12 +949,18 @@ enableEmoji = true
   # Depends on open custom blocks https://fixit.lruihao.cn/references/blocks/
   [params.customPartials]
     head = []
+    menuDesktop = []
+    menuMobile = []
     profile = []
     aside = []
     comment = []
     footer = []
     widgets = []
     assets = []
+    postTocBefore = []
+    postTocAfter = []
+    postContentBefore = []
+    postContentAfter = []
     postFooterBefore = []
     postFooterAfter = []
 
@@ -1084,8 +1205,8 @@ enableEmoji = true
         appKey = ""
         placeholder = ""
         avatar = "mp"
-        meta = ""
-        requiredFields = ""
+        meta = ['nick','mail','link']
+        requiredFields = []
         pageSize = 10
         lang = ""
         visitor = true

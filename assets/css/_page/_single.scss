@@ -27,10 +27,10 @@
   }
 
   .single-subtitle {
-    margin: 0.5rem 0;
+    margin-block: 0 0.5rem;
     font-size: 1.2rem;
     font-weight: normal;
-    line-height: 100%;
+    line-height: 1.15;
   }
 
   .post-meta {
@@ -97,6 +97,7 @@
   hr {
     position: relative;
     height: 1em;
+    margin-block: 1em;
     background: linear-gradient(to right, var(--#{$prefix}hr-background-color) 50%, transparent 50%);
     background-size: 10px 2px;
     background-position: center;
@@ -104,8 +105,6 @@
     border: none;
 
     &.awesome-hr {
-      margin-block: 0.5em;
-
       &::before {
         display: inline-block;
         font-weight: 600;
@@ -230,6 +229,41 @@
 
     ul {
       list-style-type: disc;
+
+      // Task lists
+      li[data-task] {
+        list-style: none;
+        margin-left: -1.5rem;
+      }
+    }
+
+    // Task lists
+    li[data-task] {
+      color: var(--#{$prefix}task-color);
+      .checkbox-icon {
+        margin-right: 0.25em;
+        color: var(--#{$prefix}checkbox-color);
+      }
+    }
+    li[data-task='x'],
+    li[data-task='-'] {
+      --#{$prefix}task-color: var(--#{$prefix}secondary);
+      text-decoration: line-through rgba(145, 145, 145, 0.6);
+    }
+    li[data-task='x'] {
+      --#{$prefix}checkbox-color: var(--#{$prefix}primary);
+    }
+    li[data-task='-'] {
+      opacity: 0.6;
+    }
+    li[data-task='/'] {
+      --#{$prefix}task-color: var(--#{$prefix}success);
+    }
+    li[data-task='!'] {
+      --#{$prefix}checkbox-color: var(--#{$prefix}danger);
+    }
+    li[data-task='?'] {
+      --#{$prefix}checkbox-color: var(--#{$prefix}warning);
     }
 
     dl {
@@ -257,7 +291,22 @@
       }
     }
 
+    mark {
+      padding: 0.14em 0.28em;
+      background-color: var(--#{$prefix}mark-background-color, mark);
+      color: var(--#{$prefix}mark-color, marktext);
+      @include border-radius($global-border-radius);
+
+      @each $color, $value in $theme-colors {
+        &.mark-#{$color} {
+          --#{$prefix}mark-color: #fff;
+          --#{$prefix}mark-background-color: var(--#{$prefix}#{$color});
+        }
+      }
+    }
+
     .table-wrapper {
+      position: relative;
       overflow-x: auto;
       --#{$prefix}scrollbar-thumb-color: #{$table-background-color};
 
@@ -422,6 +471,16 @@
         margin-block: 1em;
         padding-left: 1rem;
       }
+      
+      hr {
+        background-color: var(--#{$prefix}hr-background-color);
+        height: 1px;
+        margin-block: 1em;
+      }
+
+      code {
+        font-size: 0.75rem;
+      }
 
       a:not(.footnote-backref) {
         color: inherit;
@@ -436,18 +495,6 @@
 
       p {
         margin: 0.25rem 0;
-      }
-    }
-
-    hr {
-      margin-block: 0;
-    }
-
-    .footnotes {
-      hr {
-        background-color: var(--#{$prefix}hr-background-color);
-        height: 1px;
-        margin-block: 1em;
       }
     }
 
@@ -468,6 +515,13 @@
         color: $code-color-dark;
         @include box-shadow(inset 0 -1px 0 $global-border-color-dark);
       }
+    }
+
+    // Katex styles
+    .katex-display {
+      max-width: 100%;
+      overflow-x: auto;
+      padding-block: 2px;
     }
 
     @import '../_partials/_single/alert';

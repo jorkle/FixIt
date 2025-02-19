@@ -81,18 +81,26 @@
   }
 
   .summary {
-    padding-top: 1rem;
-    padding-bottom: 0.8rem;
-    color: $global-font-color;
-    border-bottom: 1px dashed $global-border-color;
+    padding-block: 1rem;
+    color: var(--#{$prefix}global-font-color);
+
+    &:not(:last-of-type)::after {
+      content: '';
+      position: absolute;
+      width: 100%;
+      padding: 2px;
+      transform: translateY(18px);
+      background: repeating-linear-gradient(
+        135deg,
+        var(--#{$prefix}hr-background-color) 0px,
+        var(--#{$prefix}hr-background-color) 4px,
+        transparent 4px,
+        transparent 8px
+      );
+    }
 
     &:first-of-type {
       padding-top: 0;
-    }
-
-    [data-theme='dark'] & {
-      color: $global-font-color-dark;
-      border-bottom: 1px dashed $global-border-color-dark;
     }
 
     .featured-image-preview {
@@ -124,36 +132,11 @@
     }
 
     .content {
-      display: block;
       margin-top: 0.3rem;
-      width: 100%;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      @include overflow-wrap(break-word);
       color: $global-font-secondary-color;
 
       [data-theme='dark'] & {
         color: $global-font-secondary-color-dark;
-      }
-
-      h2,
-      h3,
-      h4,
-      h5,
-      h6,
-      p {
-        font-size: 1rem;
-        line-height: 1.5;
-        display: inline;
-
-        &::after {
-          content: '\A';
-          white-space: pre;
-        }
-      }
-
-      h2 {
-        font-size: 1.125rem;
       }
 
       @include link(false, true);
@@ -169,7 +152,7 @@
     }
 
     .post-footer {
-      margin-top: 0.4rem;
+      margin-block: 0.4rem 0;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -181,7 +164,7 @@
         padding: 0;
 
         @include link(true, true);
-        
+
         .post-tag:not(:last-child)::after {
           content: ',';
           margin-right: 0.25rem;
