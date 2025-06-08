@@ -1,6 +1,7 @@
 @import '../_partials/_single/toc';
 @import '../_partials/_single/fixit-decryptor';
 @import '../_partials/_single/collections';
+@import '../_partials/_single/related';
 
 .single {
   .single-title {
@@ -154,7 +155,7 @@
       font-size: 0.85em;
     }
 
-    > .heading-element {
+    .heading-element {
       display: flex;
       font-weight: bold;
       line-height: 1.25;
@@ -163,11 +164,6 @@
 
       [data-theme='dark'] & {
         font-weight: bolder;
-      }
-
-      code {
-        padding: 0 .2em;
-        font-size: inherit;
       }
 
       &:hover,
@@ -366,7 +362,10 @@
 
     img {
       max-width: 100%;
-      min-height: 1em;
+      // SVG performs differently in Safari compared to other browsers
+      &:not([src*='.svg']) {
+        min-height: 1em;
+      }
 
       &.version {
         height: 1.25em;

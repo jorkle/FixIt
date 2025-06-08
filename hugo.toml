@@ -34,6 +34,8 @@ enableRobotsTXT = true
 enableGitInfo = true
 # whether to use emoji code
 enableEmoji = true
+# the main sections of a site
+mainSections = []
 
 # -------------------------------------------------------------------------------------
 # Menu Configuration
@@ -135,7 +137,7 @@ enableEmoji = true
 [module]
   [module.hugoVersion]
     extended = true
-    min = "0.141.0"
+    min = "0.146.0"
 
 # -------------------------------------------------------------------------------------
 # Markup related configuration in Hugo
@@ -889,7 +891,7 @@ enableEmoji = true
   # FixIt 0.3.17 | NEW PostChat AI config
   # Based on your posts to build a knowledge base, support AI summary, AI search, and AI Chatbot.
   # Get PostChat Key from my invitation link, thanks for your support!
-  # https://ai.tianli0.top/?InviteID=IRE1S88Z
+  # https://ai.zhheo.com/console/login?InviteID=85041330
   [params.postChat]
     enable = false
     key = ""
@@ -916,9 +918,11 @@ enableEmoji = true
     userIcon = ""
     defaultChatQuestions = []
     defaultSearchQuestions = []
+    # FixIt 0.4.0 | NEW
+    hotWords = true
 
   # FixIt 0.3.17 | NEW Summary AI config
-  # See https://postchat.zhheo.com/summary.html
+  # See https://ai.zhheo.com/docs/summary.html
   [params.postSummary]
     enable = false
     # If you set `params.postChat.key`, you don't need to set `params.postSummary.key`
@@ -1013,6 +1017,8 @@ enableEmoji = true
     linkToEdit = true
     # FixIt 0.3.0 | NEW whether to show link to report issue for the post
     linkToReport = true
+    # FixIt 0.3.20 | NEW whether to show link to view the post in VSCode
+    linkToVscode = true
     # FixIt 0.3.10 | CHANGED Page style ["narrow", "normal", "wide", ...]
     pageStyle = "normal"
     # FixIt 0.2.17 | CHANGED Auto Bookmark Support
@@ -1118,6 +1124,8 @@ enableEmoji = true
     [params.page.related]
       enable = false
       count = 5
+      # FixIt 0.3.20 | NEW position of related content, optional values: ["aside", "footer"]
+      position = ["aside", "footer"]
     # FixIt 0.2.17 | NEW Donate (Sponsor) settings
     [params.page.reward]
       enable = false

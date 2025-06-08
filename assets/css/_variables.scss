@@ -103,6 +103,10 @@ $toc-content-font-size: 0.875rem !default;
 $collection-title-font-size: 1rem !default;
 $collection-list-font-size: 0.875rem !default;
 
+// Font size of the Related Content List
+$related-title-font-size: 1rem !default;
+$related-list-font-size: 0.875rem !default;
+
 // Color of the single link
 $single-link-color: #2376b7 !default; // 花青
 $single-link-color-dark: #1781b5 !default; // 釉蓝
@@ -160,7 +164,8 @@ $code-info-color: #9c9c9c !default;
 $code-info-color-dark: #b1b0b0 !default;
 
 // Font size of the code
-$code-font-size: 0.875rem !default;
+$code-font-size: 0.875em !default;
+$code-block-font-size: 0.875rem !default;
 
 // Font family of the code
 $code-font-family: Source Code Pro, Menlo, Consolas, Monaco, monospace, $global-font-family !default;
