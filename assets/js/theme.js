@@ -636,12 +636,6 @@ class FixIt {
     }
   }
 
-  initMath(target = document.body) {
-    if (this.config.math) {
-      renderMathInElement(target, this.config.math);
-    }
-  }
-
   initMermaid() {
     if (!this.config.mermaid) {
       return;
@@ -1100,6 +1094,10 @@ class FixIt {
     pangu.autoSpacingPage();
   }
 
+  initMathJax() {
+    window.MathJax?.typeset && window.MathJax.typeset();
+  }
+
   initFixItDecryptor() {
     this.decryptor = new FixItDecryptor({
       decrypted: () => {
@@ -1108,7 +1106,6 @@ class FixIt {
         this.initLightGallery();
         this.initCodeWrapper();
         this.initTable();
-        this.initMath();
         this.initMermaid();
         this.initEcharts();
         this.initTypeit();
@@ -1117,6 +1114,7 @@ class FixIt {
         this.initToc();
         this.initTocListener();
         this.initPangu();
+        this.initMathJax();
         this.util.forEach(document.querySelectorAll('.encrypted-hidden'), ($element) => {
           $element.classList.replace('encrypted-hidden', 'decrypted-shown');
         });
@@ -1127,12 +1125,12 @@ class FixIt {
         this.initLightGallery();
         this.initCodeWrapper();
         this.initTable($content);
-        this.initMath($content);
         this.initMermaid();
         this.initEcharts();
         this.initTypeit($content);
         this.initMapbox();
         this.initPangu();
+        this.initMathJax();
         this.util.forEach($content.querySelectorAll('.encrypted-hidden'), ($element) => {
           $element.classList.replace('encrypted-hidden', 'decrypted-shown');
         });
@@ -1328,7 +1326,6 @@ class FixIt {
         this.initLightGallery();
         this.initCodeWrapper();
         this.initTable();
-        this.initMath();
         this.initMermaid();
         this.initEcharts();
         this.initTypeit();
@@ -1364,6 +1361,12 @@ class FixIt {
     } catch (err) {
       console.error(err);
     }
+    console.log(
+      `%c FixIt ${this.config.version} %c https://github.com/hugo-fixit %c`,
+      `background: #FF735A;border:1px solid #FF735A; padding: 1px; border-radius: 2px 0 0 2px; color: #fff;`,
+      `border:1px solid #FF735A; padding: 1px; border-radius: 0 2px 2px 0; color: #FF735A;`,
+      'background:transparent;'
+    );
   }
 }
 

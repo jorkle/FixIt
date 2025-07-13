@@ -492,11 +492,24 @@
       }
     }
 
-    // Katex styles
+    // KaTeX styles
     .katex-display {
       max-width: 100%;
       overflow-x: auto;
-      padding-block: 2px;
+      overflow-y: hidden;
+    }
+    .katex-error {
+      padding: 0.14em 0.28em;
+      background-color: mark;
+      cursor: help;
+      @include border-radius($global-border-radius);
+    }
+
+    // MathJax styles
+    mjx-container[jax='CHTML'][display='true'] {
+      max-width: 100%;
+      overflow-x: auto;
+      overflow-y: hidden;
     }
 
     @import '../_partials/_single/alert';

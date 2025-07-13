@@ -25,7 +25,7 @@
 > It is based on the original [LoveIt](https://github.com/dillonzq/LoveIt) Theme, [KeepIt](https://github.com/Fastbyte01/KeepIt) Theme and [LeaveIt](https://github.com/liuzc/LeaveIt) Theme.
 
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/hugo-fixit/FixIt?style=flat)](https://github.com/hugo-fixit/FixIt/releases)
-[![Hugo](https://img.shields.io/badge/Hugo-%5E0.146.0-ff4088?style=flat&logo=hugo)](https://gohugo.io/)
+[![Hugo](https://img.shields.io/badge/Hugo-%5E0.147.7-ff4088?style=flat&logo=hugo)](https://gohugo.io/)
 [![License](https://img.shields.io/github/license/hugo-fixit/FixIt?style=flat)](/LICENSE)
 [![Open Source Love](https://badges.frapsoft.com/os/v1/open-source.svg?v=103)](https://github.com/hugo-fixit/FixIt)
 
@@ -145,7 +145,7 @@ Click the following links to generate a new repository with template:
 - Extended Markdown syntax for **[Font Awesome](https://fontawesome.com/) icons**
 - Extended Markdown syntax for **ruby annotation**
 - Extended Markdown syntax for **fraction**
-- **Mathematical formula** supported by [KaTeX](https://katex.org/)
+- **Mathematical formula** supported by [KaTeX](https://katex.org/) or [MathJax](https://www.mathjax.org)
 - **Diagrams** code fences extended and shortcode supported by [mermaid](https://github.com/knsv/mermaid)
 - **Interactive data visualization** shortcode and code fences extended supported by [ECharts](https://echarts.apache.org/)
 - **Timeline** code fences extended and shortcode supported
@@ -217,6 +217,8 @@ The FixIt theme balances **simplicity** and **extensibility** with extra [Hugo t
   A Hugo theme component with caniuse shortcode.
 - [shortcode-docs-bookmark](https://github.com/hugo-fixit/shortcode-docs-bookmark)\
   🔖 Embed bookmark of FixIt Docs.
+- [shortcode-missing-translation](https://github.com/hugo-fixit/shortcode-missing-translation)\
+  A Hugo theme component with missing-translation shortcode.
 - [shortcode-mmt-netease](https://github.com/hugo-fixit/shortcode-mmt-netease)\
   🎶 A Hugo theme component with a NetEase Cloud random comment shortcode.
 - [shortcode-rewards](https://github.com/hugo-fixit/shortcode-rewards)\
@@ -273,6 +275,7 @@ Thanks to all the [contributors](https://github.com/hugo-fixit/FixIt/graphs/cont
 - [Sharer.js](https://github.com/ellisonleao/sharer.js)
 - [TypeIt](https://typeitjs.com/)
 - [KaTeX](https://katex.org/)
+- [MathJax](https://www.mathjax.org)
 - [mermaid](https://github.com/mermaid-js/mermaid)
 - [ECharts](https://echarts.apache.org/)
 - [Mapbox GL JS](https://docs.mapbox.com/mapbox-gl-js)
