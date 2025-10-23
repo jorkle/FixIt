@@ -80,11 +80,6 @@
   {{- $ctx := . -}}
   {{- range .Site.Params.customPartials.postContentBefore -}}
     {{- partial . $ctx -}}
-    {{ if .Params.enableIPReplacer }}
-      {{ $ipReplacerJS := resources.Get "js/ipreplacer.js" | resources.Minify }}
-      {{ $ipReplacerCSS := resources.Get "css/ipreplacer.css" | resources.Minify }}
-      <link rel="stylesheet" href="{{ $ipReplacerCSS.RelPermalink }}">
-      <script src="{{ $ipReplacerJS.RelPermalink }}"></script>
     {{ end }}
   {{- end -}}
 {{- end -}}
