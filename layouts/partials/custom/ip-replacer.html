@@ -1,6 +1,0 @@
-{{- if .Params.enableIPReplacer -}}
-  {{- $ipReplacerJS := resources.Get "js/ip-replacer.js" | resources.Minify -}}
-  {{- $ipReplacerCSS := resources.Get "css/ip-replacer.css" | resources.Minify -}}
-  <link rel="stylesheet" href="{{ $ipReplacerCSS.RelPermalink }}">
-  <script src="{{ $ipReplacerJS.RelPermalink }}"></script>
-{{- end -}}
