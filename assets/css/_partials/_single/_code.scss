@@ -4,7 +4,7 @@ code {
 }
 
 // indented code
-pre:not(.mermaid[data-processed='true']) {
+pre:not([data-processed]) {
   margin: 0;
   line-height: 1.45em;
   padding: 0.5rem;
@@ -45,7 +45,7 @@ pre:not(.mermaid[data-processed='true']) {
   font-family: $code-font-family;
 
   .table-wrapper {
-    --#{$prefix}scrollbar-thumb-color: initial;
+    #{$rootPrefix}scrollbar-thumb-color: initial;
     > table,
     > table thead,
     > table tr,
@@ -66,7 +66,7 @@ pre:not(.mermaid[data-processed='true']) {
     position: relative;
 
     .code-header {
-      --#{$prefix}bg-code-header: #{darken($code-background-color, 3%)};
+      #{$rootPrefix}bg-code-header: #{darken($code-background-color, 3%)};
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -76,20 +76,20 @@ pre:not(.mermaid[data-processed='true']) {
       font-weight: bold;
       line-height: 1.4em;
       color: $code-info-color;
-      background-color: var(--#{$prefix}bg-code-header);
+      background-color: var(#{$rootPrefix}bg-code-header);
       @include border-radius($global-border-radius);
       @include transition(border-radius 0.2s ease);
 
       // delayed loading table-wrapper
       & + .table-wrapper {
-        max-height: 0;
+        height: 0;
         @include border-radius(0 0 $global-border-radius $global-border-radius);
-        @include details-transition-open;
+        @include transition(height 0.5s ease-out);
       }
 
       [data-theme='dark'] & {
         color: $code-info-color-dark;
-        --#{$prefix}bg-code-header: #{darken($code-background-color-dark, 3%)};
+        #{$rootPrefix}bg-code-header: #{darken($code-background-color-dark, 3%)};
       }
 
       &:hover {
@@ -115,7 +115,7 @@ pre:not(.mermaid[data-processed='true']) {
           position: absolute;
           left: 50%;
           transform: translateX(-50%);
-          background-color: var(--#{$prefix}bg-code-header);
+          background-color: var(#{$rootPrefix}bg-code-header);
           padding-inline: 1em;
           max-width: 80%;
           white-space: nowrap;
@@ -218,17 +218,16 @@ pre:not(.mermaid[data-processed='true']) {
 
     &.open {
       .code-header {
-        --#{$prefix}bg-code-header: #{darken($code-background-color, 6%)};
+        #{$rootPrefix}bg-code-header: #{darken($code-background-color, 6%)};
         @include border-radius($global-border-radius $global-border-radius 0 0);
 
         [data-theme='dark'] & {
-          --#{$prefix}bg-code-header: #{darken($code-background-color-dark, 6%)};
+          #{$rootPrefix}bg-code-header: #{darken($code-background-color-dark, 6%)};
         }
       }
 
       .table-wrapper {
-        max-height: 100%;
-        @include details-transition-close;
+        height: auto;
       }
 
       .arrow {

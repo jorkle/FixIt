@@ -67,13 +67,13 @@
       top: 0;
     }
     // adjust the scroll margin top of the content anchors on the page
-    body:not([data-header-desktop='auto']) &+.container .content [id] {
-      scroll-margin-top: calc(var(--#{$prefix}scroll-mt) + var(--#{$prefix}breadcrumb-height));
+    body:not([data-header-desktop='auto']) &+.fi-container .content [id] {
+      scroll-margin-top: calc(var(#{$rootPrefix}scroll-mt) + var(#{$rootPrefix}breadcrumb-height));
     }
   }
 
   [data-header-desktop='normal'] .page .content [id] {
-    --#{$prefix}scroll-mt: #{$global-scroll-margin-top};
+    #{$rootPrefix}scroll-mt: #{$global-scroll-margin-top};
   }
 }
 
@@ -95,13 +95,13 @@
       top: 0;
     }
     // adjust the scroll margin top of the content anchors on the page
-    body:not([data-header-mobile='auto']) &+.container .content [id] {
-      scroll-margin-top: calc(var(--#{$prefix}scroll-mt) + var(--#{$prefix}breadcrumb-height));
+    body:not([data-header-mobile='auto']) &+.fi-container .content [id] {
+      scroll-margin-top: calc(var(#{$rootPrefix}scroll-mt) + var(#{$rootPrefix}breadcrumb-height));
     }
   }
 
   [data-header-mobile='normal'] .page .content [id] {
-    --#{$prefix}scroll-mt: #{$global-scroll-margin-top};
+    #{$rootPrefix}scroll-mt: #{$global-scroll-margin-top};
   }
   
   %page-style {
@@ -131,7 +131,7 @@
 
   // 确保打印时没有 scrollbar
   :root {
-    --fi-scrollbar-width: none !important;
+    #{$rootPrefix}scrollbar-width: none !important;
   }
 
   *::-webkit-scrollbar {

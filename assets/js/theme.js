@@ -371,7 +371,7 @@ class FixIt {
     const $breadcrumbContainer = document.querySelector('.breadcrumb-container.sticky')
     this.breadcrumbHeight = $breadcrumbContainer?.clientHeight ?? 0;
     if (this.breadcrumbHeight) {
-      document.querySelector('main.container')?.style.setProperty('--fi-breadcrumb-height', `${this.breadcrumbHeight}px`);
+      document.querySelector('main.fi-container')?.style.setProperty('--fi-breadcrumb-height', `${this.breadcrumbHeight}px`);
     }
   }
 
@@ -519,6 +519,31 @@ class FixIt {
     });
   }
 
+  /**
+   * init diagram copy button
+   */
+  initDiagramCopyBtn() {
+    const stagingDOM = this.util.getStagingDOM()
+    this.util.forEach(document.querySelectorAll('.diagram-copy-btn'), ($btn) => {
+      $btn.addEventListener('click', () => {
+        stagingDOM.stage($btn.parentElement.querySelector('template').content.cloneNode(true))
+        let code = stagingDOM.contentAsText();
+        try {
+          code = JSON.stringify(JSON.parse(code), null, 2);
+        } catch {}
+        this.util.copyText(code).then(() => {
+          $btn.toggleAttribute('data-copied', true);
+          setTimeout(() => {
+            $btn.toggleAttribute('data-copied', false);
+          }, 2000);
+        }, () => {
+          console.error('Clipboard write failed!', 'Your browser does not support clipboard API!');
+        });
+      }, false);
+    });
+    stagingDOM.destroy();
+  }
+
   initTable(target = document) {
     this.util.forEach(target.querySelectorAll('.content table'), ($table) => {
       const $wrapper = document.createElement('div');
@@ -567,11 +592,11 @@ class FixIt {
       const $tocLiElements = $tocCore.getElementsByTagName('li');
       const $headingElements = document.getElementsByClassName('heading-element');
       const headerHeight = document.getElementById('header-desktop').offsetHeight;
-      document.querySelector('.container').addEventListener('resize', () => {
-        $toc.style.marginBottom = `${document.querySelector('.container').clientHeight - document.querySelector('.post-footer').offsetTop}px`;
+      document.querySelector('.fi-container').addEventListener('resize', () => {
+        $toc.style.marginBottom = `${document.querySelector('.fi-container').clientHeight - document.querySelector('.post-footer').offsetTop}px`;
       });
       this._tocOnScroll = this._tocOnScroll || (() => {
-        $toc.style.marginBottom = `${document.querySelector('.container').clientHeight - document.querySelector('.post-footer').offsetTop}px`;
+        $toc.style.marginBottom = `${document.querySelector('.fi-container').clientHeight - document.querySelector('.post-footer').offsetTop}px`;
         this.util.forEach($tocLinkElements, ($tocLink) => {
           $tocLink.classList.remove('active');
         });
@@ -634,34 +659,6 @@ class FixIt {
         $headingMark.parentElement.replaceChild($newHeadingMark, $headingMark);
       });
     }
-  }
-
-  initMermaid() {
-    if (!this.config.mermaid) {
-      return;
-    }
-    const _initializeAndRun = () => {
-      const themes = this.config.mermaid.themes ?? ['default', 'dark'];
-      window.mermaid.initialize({
-        securityLevel: 'loose',
-        startOnLoad: false,
-        theme: this.isDark ? themes[1] : themes[0],
-      });
-      window.mermaid.run()
-    }
-    _initializeAndRun()
-    this.switchThemeEventSet.add(() => {
-      // Reinitialize and run mermaid when theme changes.
-      this.util.forEach(document.querySelectorAll('.mermaid[data-processed]'), ($mermaid) => {
-        $mermaid.dataset.processed = ''
-        $mermaid.innerHTML = ''
-        $mermaid.appendChild($mermaid.nextElementSibling.content.cloneNode(true))
-      })
-      _initializeAndRun()
-    });
-    this.beforeprintEventSet.add(() => { 
-      // Set the theme to neutral when printing.
-    });
   }
 
   initEcharts() {
@@ -1059,19 +1056,10 @@ class FixIt {
   }
 
   initWatermark() {
-    this.config.watermark?.enable &&
-      new Watermark({
-        content: this.config.watermark.content || `${document.querySelector('footer .fixit-icon')?.outerHTML ?? ''} FixIt Theme`,
-        appendTo: '.widgets',
-        opacity: this.config.watermark.opacity,
-        width: this.config.watermark.width,
-        height: this.config.watermark.height,
-        rowSpacing: this.config.watermark.rowspacing,
-        colSpacing: this.config.watermark.colspacing,
-        rotate: this.config.watermark.rotate,
-        fontSize: this.config.watermark.fontsize,
-        fontFamily: this.config.watermark.fontfamily
-      });
+    if (!this.config.watermark?.enable) {
+      return;
+    }
+    new Watermark(this.config.watermark);
   }
 
   initPangu() {
@@ -1098,6 +1086,19 @@ class FixIt {
     window.MathJax?.typeset && window.MathJax.typeset();
   }
 
+  initJsonViewer() {
+    if (!window.JsonViewerElement) {
+      return;
+    }
+    this._jsonViewerOnSwitchTheme = this._jsonViewerOnSwitchTheme || (() => {
+      this.util.forEach(document.getElementsByTagName('json-viewer'), ($el) => {
+        $el.setAttribute('theme', this.isDark ? 'dark' : 'light');
+      });
+    });
+    this.switchThemeEventSet.add(this._jsonViewerOnSwitchTheme);
+    this._jsonViewerOnSwitchTheme();
+  }
+
   initFixItDecryptor() {
     this.decryptor = new FixItDecryptor({
       decrypted: () => {
@@ -1105,8 +1106,8 @@ class FixIt {
         this.initDetails();
         this.initLightGallery();
         this.initCodeWrapper();
+        this.initDiagramCopyBtn();
         this.initTable();
-        this.initMermaid();
         this.initEcharts();
         this.initTypeit();
         this.initMapbox();
@@ -1115,6 +1116,9 @@ class FixIt {
         this.initTocListener();
         this.initPangu();
         this.initMathJax();
+        this.initJsonViewer();
+        window.FixItMermaid?.init?.();
+        window.FixItAPlayer?.init?.();
         this.util.forEach(document.querySelectorAll('.encrypted-hidden'), ($element) => {
           $element.classList.replace('encrypted-hidden', 'decrypted-shown');
         });
@@ -1124,13 +1128,16 @@ class FixIt {
         this.initDetails($content);
         this.initLightGallery();
         this.initCodeWrapper();
+        this.initDiagramCopyBtn();
         this.initTable($content);
-        this.initMermaid();
         this.initEcharts();
         this.initTypeit($content);
         this.initMapbox();
         this.initPangu();
         this.initMathJax();
+        this.initJsonViewer();
+        window.FixItMermaid?.init?.();
+        window.FixItAPlayer?.init?.();
         this.util.forEach($content.querySelectorAll('.encrypted-hidden'), ($element) => {
           $element.classList.replace('encrypted-hidden', 'decrypted-shown');
         });
@@ -1325,12 +1332,13 @@ class FixIt {
         this.initDetails();
         this.initLightGallery();
         this.initCodeWrapper();
+        this.initDiagramCopyBtn();
         this.initTable();
-        this.initMermaid();
         this.initEcharts();
         this.initTypeit();
         this.initMapbox();
         this.initPangu();
+        this.initJsonViewer();
       }
       this.initThemeColor();
       this.initSVGIcon();

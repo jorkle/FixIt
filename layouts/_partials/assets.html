@@ -1,9 +1,25 @@
+{{- /*
+FixIt theme assets partial
+===============================================
+- Third-party libraries and plugins
+- Theme assets and plugins
+  - Config script
+  - MathJax plugin
+  - Mermaid plugin
+  - Theme script
+  - Custom Assets block
+  - Custom script
+===============================================
+*/ -}}
+
 {{- $noop := .WordCount -}}
 {{- $params := partial "function/params.html" -}}
 {{- $cdn := .Site.Store.Get "cdn" | default dict -}}
 {{- $fingerprint := .Site.Store.Get "fingerprint" -}}
 {{- $config := (.Store.Get "this").config -}}
 {{- $config = dict "version" (hugo.Store.Get "version") | merge $config -}}
+{{- $author := partial "function/get-author-map.html" .Params.author -}}
+{{- $noBaseRelPermalink := strings.TrimPrefix (relURL "") $.RelPermalink -}}
 
 {{- /* Search */ -}}
 {{- if .Site.Params.search | and .Site.Params.search.enable -}}
@@ -42,6 +58,12 @@
 {{- if $params.instantPage -}}
   {{- $source := $cdn.instantPage | default "lib/instant-page/instantpage.min.js" -}}
   {{- dict "Source" $source "Fingerprint" $fingerprint "Attr" `type="module"` "Async" true "Defer" true | dict "Page" . "Data" | partial "store/script.html" -}}
+{{- end -}}
+
+{{- /* JSON Viewer */ -}}
+{{- if .Store.Get "hasJsonViewer" -}}
+  {{- $source := $cdn.jsonViewerElementJS | default "lib/json-viewer-element/json-viewer-element.umd.js" -}}
+  {{- dict "Source" $source "Fingerprint" $fingerprint "Defer" true | dict "Page" . "Data" | partial "store/script.html" -}}
 {{- end -}}
 
 {{- /* twemoji */ -}}
@@ -90,54 +112,45 @@
   {{- $config = dict "speed" $typeit.speed "cursorSpeed" $typeit.cursorSpeed "cursorChar" $typeit.cursorChar "duration" $typeit.duration "loop" $typeit.loop | dict "typeit" | merge $config -}}
 {{- end -}}
 
-{{- /* Mathematical formulas */ -}}
+{{- /* KaTeX */ -}}
 {{- $math := .Store.Get "math" -}}
-{{- if $math.enable -}}
-  {{- /* KaTeX */ -}}
-  {{- if (eq $math.type "katex") | and (.Store.Get "hasKaTeX") -}}
-    {{- $source := $cdn.katexCSS | default "lib/katex/katex.min.css" -}}
-    {{- dict "Source" $source "Fingerprint" $fingerprint "Preload" true | dict "Page" . "Data" | partial "store/style.html" -}}
-    {{- /* Copy-tex extension */ -}}
-    {{- if $math.katex.copyTex -}}
-      {{- $source := $cdn.katexCopyTexJS | default "lib/katex/copy-tex.min.js" -}}
-      {{- dict "Source" $source "Fingerprint" $fingerprint "Defer" true | dict "Page" . "Data" | partial "store/script.html" -}}
-    {{- end -}}
-  {{- end -}}
-
-  {{- /* MathJax */ -}}
-  {{- if eq $math.type "mathjax" -}}
-    {{/*  TODO improve MathJax setup. e.g. content encryption, Twikoo math etc.  */}}
-    {{- $mathjax := $math.mathjax -}}
-    {{- $source := "js/lib/load-mathjax.js" -}}
-    {{- $options := dict "targetPath" "js/lib/load-mathjax.min.js" "minify" hugo.IsProduction -}}
-    {{- $mathjaxOpts := $mathjax.options | default dict -}}
-    {{- $mathjaxOpts = dict "enableMenu" $mathjaxOpts.enablemenu | merge $mathjaxOpts -}}
-    {{- $params := dict
-      "cdn" $mathjax.cdn
-      "tex" ($mathjax.tex | default dict)
-      "packages" ($mathjax.packages | default dict)
-      "macros" ($mathjax.macros | default dict)
-      "loader" ($mathjax.loader | default dict)
-      "options" $mathjaxOpts
-    -}}
-    {{- $options = dict "params" $params | merge $options -}}
-    {{- if not hugo.IsProduction -}}
-      {{- $options = dict "sourceMap" "external" | merge $options -}}
-    {{- end -}}
-    {{- dict "Source" $source "Build" $options "Fingerprint" $fingerprint "Async" true "Defer" true | dict "Page" . "Data" | partial "store/script.html" -}}
+{{- if .Store.Get "hasKaTeX" -}}
+  {{- $source := $cdn.katexCSS | default "lib/katex/katex.min.css" -}}
+  {{- dict "Source" $source "Fingerprint" $fingerprint "Preload" true | dict "Page" . "Data" | partial "store/style.html" -}}
+  {{- /* Copy-tex extension */ -}}
+  {{- if $math.katex.copyTex -}}
+    {{- $source := $cdn.katexCopyTexJS | default "lib/katex/copy-tex.min.js" -}}
+    {{- dict "Source" $source "Fingerprint" $fingerprint "Defer" true | dict "Page" . "Data" | partial "store/script.html" -}}
   {{- end -}}
 {{- end -}}
 
-{{- /* mermaid */ -}}
-{{- if .Store.Get "hasMermaid" -}}
-  {{- $config = dict "themes" .Site.Params.mermaid.themes | dict "mermaid" | merge $config -}}
-  <script type="module">
-    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11.3.0/dist/mermaid.esm.min.mjs';
-    // Style conflict with ZenUML
-    // import zenuml from 'https://cdn.jsdelivr.net/npm/@mermaid-js/mermaid-zenuml@0.2.0/dist/mermaid-zenuml.esm.min.mjs'
-    // await mermaid.registerExternalDiagrams([zenuml]);
-    window.mermaid = mermaid;
-  </script>
+{{- /* MathJax */ -}}
+{{- if .Store.Get "hasMathJax" -}}
+  {{- $mathjax := $math.mathjax -}}
+  {{- $mjoc := $mathjax.options | default dict -}}
+  {{- $mjo := dict -}}
+  {{- if eq $mjoc.enableMenu false -}}
+    {{- $mjo = dict "enableMenu" false | merge $mjo -}}
+  {{- end -}}
+  {{- with $mjoc.ignoreHtmlClass -}}
+    {{- $mjo = dict "ignoreHtmlClass" . | merge $mjo -}}
+  {{- end -}}
+  {{- with $mjoc.skipHtmlTags -}}
+    {{- $mjo = dict "skipHtmlTags" . | merge $mjo -}}
+  {{- end -}}
+  {{- with $mjoc.includeHtmlTags -}}
+    {{- $mjo = dict "includeHtmlTags" . | merge $mjo -}}
+  {{- end -}}
+  {{- $config = dict
+    "cdn" $mathjax.cdn
+    "tex" ($mathjax.tex | default dict)
+    "packages" ($mathjax.packages | default dict)
+    "macros" ($mathjax.macros | default dict)
+    "loader" ($mathjax.loader | default dict)
+    "options" $mjo
+    | dict "mathjax"
+    | merge $config
+  -}}
 {{- end -}}
 
 {{- /* ECharts */ -}}
@@ -160,7 +173,7 @@
 {{- end -}}
 
 {{- /* Music */ -}}
-{{- if .HasShortcode "music" -}}
+{{- if (.HasShortcode "aplayer") | or (.HasShortcode "music") -}}
   {{- /* APlayer */ -}}
   {{- $source := $cdn.aplayerCSS | default "lib/aplayer/APlayer.min.css" -}}
   {{- dict "Source" $source "Fingerprint" $fingerprint "Preload" true | dict "Page" . "Data" | partial "store/style.html" -}}
@@ -169,9 +182,24 @@
   {{- $source := $cdn.aplayerJS | default "lib/aplayer/APlayer.min.js" -}}
   {{- dict "Source" $source "Fingerprint" $fingerprint "Defer" true | dict "Page" . "Data" | partial "store/script.html" -}}
 
-  {{- /* MetingJS */ -}}
-  {{- $source := $cdn.metingJS | default "lib/meting/Meting.min.js" -}}
-  {{- dict "Source" $source "Fingerprint" $fingerprint "Defer" true | dict "Page" . "Data" | partial "store/script.html" -}}
+  {{- if .HasShortcode "aplayer" -}}
+    {{- $options := dict "targetPath" "js/lib/aplayer.min.js" "minify" hugo.IsProduction -}}
+    {{- if not hugo.IsProduction -}}
+      {{- $options = dict "sourceMap" "external" | merge $options -}}
+    {{- end -}}
+    {{- dict "Source" (resources.Get "js/lib/aplayer.js") "Build" $options "Fingerprint" $fingerprint "Defer" true | dict "Page" . "Data" | partial "store/script.html" -}}
+  {{- end -}}
+  {{- if .HasShortcode "music" -}}
+    {{- /* MetingJS */ -}}
+    {{- $source := $cdn.metingJS | default "lib/meting/Meting.min.js" -}}
+    {{- dict "Source" $source "Fingerprint" $fingerprint "Defer" true | dict "Page" . "Data" | partial "store/script.html" -}}
+  {{- end -}}
+{{- end -}}
+
+{{- /* Tabs and tab */ -}}
+{{- if .Store.Get "hasTabs" -}}
+  {{- $source := $cdn.tabContainerElementJS | default "lib/tab-container-element/bundle.min.js" -}}
+  {{- dict "Source" $source "Fingerprint" $fingerprint "Attr" `type="module"` "Defer" true | dict "Page" . "Data" | partial "store/script.html" -}}
 {{- end -}}
 
 {{- /* Cookie Consent */ -}}
@@ -197,8 +225,17 @@
 {{- if eq .Site.Params.watermark.enable true -}}
   {{- $source := $cdn.cellWatermarkJS | default "lib/cell-watermark/watermark.min.js" -}}
   {{- dict "Source" $source "Fingerprint" $fingerprint "Defer" true | dict "Page" . "Data" | partial "store/script.html" -}}
-  {{- /* Hugo bug: case insensitive for `.Site.Params` */ -}}
-  {{- $config = dict "watermark" .Site.Params.watermark | merge $config -}}
+  {{- $watermarkConfig := .Site.Params.watermark | default dict -}}
+  {{- $watermarkConfig = dict
+    "appendTo" ".widgets"
+    "content" ($watermarkConfig.content | default $author.name | default .Site.Title)
+    "rowSpacing" $watermarkConfig.rowSpacing
+    "colSpacing" $watermarkConfig.colSpacing
+    "fontSize" $watermarkConfig.fontSize
+    "fontFamily" $watermarkConfig.fontFamily
+    | merge $watermarkConfig
+  -}}
+  {{- $config = dict "watermark" $watermarkConfig | merge $config -}}
 {{- end -}}
 
 {{- /* Content Decryption */ -}}
@@ -281,19 +318,36 @@
   {{- dict "Source" . "Fingerprint" $fingerprint "Defer" true | dict "Page" $ "Data" | partial "store/script.html" -}}
 {{- end -}}
 
-{{- with .Store.Get "styleArr" -}}
-  {{- $content := delimit . " " -}}
-  {{- $path := substr (md5 $.RelPermalink) 0 8 | printf "css/%v" -}}
-  {{- $options := printf "%v.min.css" $path | dict "targetPath" -}}
-  {{- dict "Content" $content "Path" (printf "%v.scss" $path) "ToCSS" $options | dict "Page" $ "Data" | partial "store/style.html" -}}
-{{- end -}}
-
-{{- /* Config script */ -}}
+{{- /* Config scripts */ -}}
 {{- $configJS := $config | jsonify | printf "window.config=%s;" -}}
 {{- if hugo.IsServer -}}
   {{- $configJS = add $configJS "console.log('Page config:', window.config);" -}}
 {{- end -}}
-{{- $configJS | dict "Content" | dict "Page" . "Data" | partial "store/script.html" -}}
+{{- $targetPath := $noBaseRelPermalink | printf "%s/config/page.js" -}}
+{{- if (path.Ext .Page.RelPermalink) | or .IsHome -}}
+  {{- $targetPath = "" -}}
+{{- end -}}
+{{- dict "Content" $configJS "Path" $targetPath "Defer" true | dict "Page" . "Data" | partial "store/script.html" -}}
+
+{{- /* MathJax plugin */ -}}
+{{- if .Store.Get "hasMathJax" -}}
+  {{- $targetPath := $noBaseRelPermalink | printf "%s/mathjax.min.js" -}}
+  {{- if (path.Ext .Page.RelPermalink) | or .IsHome -}}
+    {{- $targetPath = "" -}}
+  {{- end -}}
+  {{- $options := dict "targetPath" $targetPath "minify" hugo.IsProduction -}}
+  {{- if not hugo.IsProduction -}}
+    {{- $options = dict "sourceMap" "external" | merge $options -}}
+  {{- end -}}
+  {{- dict "Source" (resources.Get "js/lib/mathjax.js") "Build" $options "Fingerprint" $fingerprint "Defer" true | dict "Page" . "Data" | partial "store/script.html" -}}
+{{- end -}}
+
+{{- /* Mermaid plugin */ -}}
+{{- if .Store.Get "hasMermaid" -}}
+  {{- $options := dict "Source" "js/lib/mermaid.js" "Template" "js/lib/mermaid.js" -}}
+  {{- $options = dict "Context" . "Minify" hugo.IsProduction "Fingerprint" $fingerprint "Attr" `type="module"` | merge $options -}}
+  {{- $options | dict "Page" $ "Data" | partial "store/script.html" -}}
+{{- end -}}
 
 {{- /* Theme script */ -}}
 {{- $options := dict "targetPath" "js/theme.min.js" "minify" hugo.IsProduction -}}
@@ -309,14 +363,21 @@
 {{- with ((resources.Get "js/custom.js") | default (resources.Get "js/_custom.js")) -}}
   {{- $options := dict "targetPath" "js/custom.min.js" "minify" hugo.IsProduction -}}
   {{- if not hugo.IsProduction -}}
-    {{- $options = dict "sourceMap" "inline" | merge $options -}}
+    {{- $options = dict "sourceMap" "external" | merge $options -}}
   {{- end -}}
   {{- dict "Source" . "Build" $options "Fingerprint" $fingerprint "Defer" true | dict "Page" $ "Data" | partial "store/script.html" -}}
 {{- end -}}
 
+{{- with .Store.Get "styleArr" -}}
+  {{- $content := delimit . " " -}}
+  {{- $path := $noBaseRelPermalink | printf "%s/index.scss" -}}
+  {{- $options := printf "%s/index.min.css" $noBaseRelPermalink | dict "targetPath" -}}
+  {{- dict "Content" $content "Path" $path "ToCSS" $options | dict "Page" $ "Data" | partial "store/style.html" -}}
+{{- end -}}
+
 {{- with .Store.Get "scriptArr" -}}
   {{- $content := delimit . "\n" -}}
-  {{- $targetPath := substr (md5 $.RelPermalink) 0 8 | printf "js/%v.js" -}}
+  {{- $targetPath := $noBaseRelPermalink | printf "%s/index.js" -}}
   {{- dict "Content" $content "Path" $targetPath "Defer" true | dict "Page" $ "Data" | partial "store/script.html" -}}
 {{- end -}}
 

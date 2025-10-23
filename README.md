@@ -24,25 +24,21 @@
 
 > It is based on the original [LoveIt](https://github.com/dillonzq/LoveIt) Theme, [KeepIt](https://github.com/Fastbyte01/KeepIt) Theme and [LeaveIt](https://github.com/liuzc/LeaveIt) Theme.
 
-[![GitHub release (latest by date)](https://img.shields.io/github/v/release/hugo-fixit/FixIt?style=flat)](https://github.com/hugo-fixit/FixIt/releases)
+[![Build](https://img.shields.io/github/deployments/hugo-fixit/FixIt/Production?style=flat&label=Build&logo=vercel)](https://demo.fixit.lruihao.cn/)
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/hugo-fixit/FixIt?style=flat&label=Release&logo=github&include_prereleases)](https://github.com/hugo-fixit/FixIt/releases)
 [![Hugo](https://img.shields.io/badge/Hugo-%5E0.147.7-ff4088?style=flat&logo=hugo)](https://gohugo.io/)
-[![License](https://img.shields.io/github/license/hugo-fixit/FixIt?style=flat)](/LICENSE)
-[![Open Source Love](https://badges.frapsoft.com/os/v1/open-source.svg?v=103)](https://github.com/hugo-fixit/FixIt)
+[![License](https://img.shields.io/github/license/hugo-fixit/FixIt?style=flat&label=License)](/LICENSE)
+[![GitHub stars](https://img.shields.io/github/stars/hugo-fixit/FixIt?style=social)](https://github.com/hugo-fixit/FixIt)
+[![Gitee star of FixIt](https://gitee.com/lruihao/FixIt/badge/star.svg)](https://gitee.com/lruihao/FixIt/stargazers)
 
 ## Live Preview
 
 <p align="center">
-  💟 <a href="https://fixit.lruihao.cn">Production</a> | ❇️ <a href="https://pre.fixit.lruihao.cn">Preview</a> | 🚼 <a href="https://demo.fixit.lruihao.cn">Demo</a> | 🆕 <a href="https://hugo-fixit.github.io/hugo-fixit-starter/">Starter</a>
+  💟 <a href="https://fixit.lruihao.cn">Docs</a> | ❇️ <a href="https://demo.fixit.lruihao.cn/test/">Test</a> | 🚼 <a href="https://demo.fixit.lruihao.cn">Demo</a> | 🆕 <a href="https://hugo-fixit.github.io/hugo-fixit-starter/">Starter</a>
 <br>
 <br>
   More FixIt examples <a href="https://fixit.lruihao.cn/showcase/">here</a>.
 </p>
-
-## Why choose FixIt
-
-I don't know why 🤷.
-
-<!-- Too lazy to write... -->
 
 ## Usage
 
@@ -145,6 +141,8 @@ Click the following links to generate a new repository with template:
 - Extended Markdown syntax for **[Font Awesome](https://fontawesome.com/) icons**
 - Extended Markdown syntax for **ruby annotation**
 - Extended Markdown syntax for **fraction**
+- Multiple **admonitions** shortcode or **alerts** extended Markdown syntax
+- **Tabs** and **Tab** shortcode with multiple design styles
 - **Mathematical formula** supported by [KaTeX](https://katex.org/) or [MathJax](https://www.mathjax.org)
 - **Diagrams** code fences extended and shortcode supported by [mermaid](https://github.com/knsv/mermaid)
 - **Interactive data visualization** shortcode and code fences extended supported by [ECharts](https://echarts.apache.org/)
@@ -152,7 +150,6 @@ Click the following links to generate a new repository with template:
 - **Mapbox** shortcode supported by [Mapbox GL JS](https://docs.mapbox.com/mapbox-gl-js)
 - **Music player** shortcode supported by [APlayer](https://github.com/MoePlayer/APlayer) and [MetingJS](https://github.com/metowolf/MetingJS)
 - **Bilibili player** and **Douyin player** shortcode
-- Kinds of **admonitions** shortcode
 - **Custom style** shortcode
 - **Custom script** shortcode
 - Open more **custom blocks**
@@ -256,10 +253,12 @@ Also, we welcome Issue or PR to our [official-components](https://github.com/hug
 
 ## Acknowledgements
 
-Thanks to all the [contributors](https://github.com/hugo-fixit/FixIt/graphs/contributors) for their support!
+Thanks to the support of [all contributors](https://github.com/hugo-fixit/FixIt/graphs/contributors)!
+
+Thanks to the [Hugo DoIt](https://github.com/HEIGE-PCloud/DoIt) theme and [Hexo NexT](https://github.com/next-theme/hexo-theme-next) theme for inspiration and reference.
 
 <details>
-<summary>Thanks to the authors of following resources included in the theme:</summary>
+<summary>Thanks to all the open source projects used in the FixIt theme.</summary>
 
 - [normalize.css](https://github.com/necolas/normalize.css)
 - [Font Awesome](https://fontawesome.com/)
@@ -292,18 +291,12 @@ Thanks to all the [contributors](https://github.com/hugo-fixit/FixIt/graphs/cont
 - [Waline](https://waline.js.org/)
 - [Twikoo](https://twikoo.js.org/)
 - [github-corners](https://github.com/tholman/github-corners)
-- [giscus](https://giscus.app/)
+- [giscus](https://giscus.app/zh-CN)
 - [crypto-js](https://github.com/brix/crypto-js)
 - [pace](https://github.com/CodeByZach/pace)
 - [xxhash-wasm](https://github.com/jungomi/xxhash-wasm)
-
-</details>
-
-<details>
-<summary>The FixIt also draws on some features of the following projects, and thanks to their authors as well:</summary>
-
-- [DoIt](https://github.com/HEIGE-PCloud/DoIt)
-- [NexT](https://github.com/next-theme/hexo-theme-next)
+- [`<tab-container>` element](https://github.com/github/tab-container-element)
+- [`<json-viewer>` element](https://github.com/Lruihao/json-viewer-element)
 
 </details>
 
@@ -311,17 +304,17 @@ Thanks to all the [contributors](https://github.com/hugo-fixit/FixIt/graphs/cont
 
 FixIt is licensed under the **MIT** license. Check the [LICENSE file](/LICENSE) for details.
 
-## Sponsor
+## Sponsor Support
 
-If you enjoy the theme, please consider buying me a coffee ☕️. Thanks!
+If you enjoy the theme, please consider buying me a cup of coffee ☕️. Thanks!
 
-- [Wechat](/images/wechatpay.jpg)
+- [WeChat Pay](/images/wechatpay.jpg)
 - [Alipay](/images/alipay.jpg)
 - [PayPal](https://paypal.me/Lruihao)
 
-Thanks to the following sponsors for their support:
+Thanks to the following sponsors for their great support:
 
-- [translate.js](https://github.com/xnx3/translate) Sponsoring [Enterprise Translation Channel](https://translate.zvo.cn/4087.html).
+- [translate.js](https://github.com/xnx3/translate) sponsored [Enterprise Translation Channel](https://translate.zvo.cn/4087.html).
 
 ## Author
 
