@@ -1,19 +1,31 @@
 <div class="widgets">
   {{- $backToTop := .Site.Params.backToTop -}}
+  {{- $params := partial "function/params.html" -}}
   {{- $comment := .Store.Get "comment" -}}
   {{- if $backToTop.enable | or $comment.enable -}}
-    <div class="fixed-buttons animate__faster d-none">
+    <div class="fixed-buttons">
       {{- /* back to top button */ -}}
       {{- if $backToTop.enable -}}
-        <div class="fixed-button back-to-top" role="button" aria-label="{{ T `baseof.backToTop` }}">
-          {{- dict "Class" "fa-solid fa-arrow-up fa-fw" | partial "plugin/icon.html" -}}
-          <span class="variant-numeric{{ if not $backToTop.scrollpercent }} d-none{{ end }}">0%</span>
+        <div class="fixed-button back-to-top animate__faster d-none" role="button" aria-label="{{ T `baseof.backToTop` }}">
+          {{- dict "Class" "fa-solid fa-arrow-up" | partial "plugin/icon.html" -}}
+          {{- if $backToTop.scrollpercent -}}
+            <svg viewBox="0 0 100 100">
+              <circle class="bg" cx="50" cy="50" r="50"></circle>
+              <circle class="progress" cx="50" cy="50" r="50"></circle>
+            </svg>
+          {{- end -}}
+        </div>
+      {{- end -}}
+      {{- /* toc dialog button */ -}}
+      {{- if .Store.Get "showToc" -}}
+        <div id="toc-drawer-button" class="fixed-button toc-drawer-button d-none{{ with $params.password }} encrypted-hidden{{ end }}" role="button" aria-label="{{ T `single.contents` }}">
+          {{- dict "Class" "fa-solid fa-bars" | partial "plugin/icon.html" -}}
         </div>
       {{- end -}}
       {{- /* comment button */ -}}
       {{- if $comment.enable -}}
         <div class="fixed-button view-comments d-none" role="button" aria-label="{{ T `baseof.viewComments` }}">
-          {{- dict "Class" "fa-solid fa-comment fa-fw" | partial "plugin/icon.html" -}}
+          {{- dict "Class" "fa-solid fa-comment" | partial "plugin/icon.html" -}}
         </div>
       {{- end -}}
     </div>
@@ -38,16 +50,16 @@
     {{- with $readingProgress -}}
       {{- $style := printf "%v: 0;%v: 0;" (.Start | default "left") (.Position | default "top") -}}
       {{- if .Height | and (ne .Height "2px")   -}}
-        {{- $style = printf "%v--progress-h: %v;" $style .Height -}}
+        {{- $style = printf "%v--fi-progress-h: %v;" $style .Height -}}
       {{- end -}}
       {{- if .Reversed -}}
-        {{- $style = printf "%v%v" $style "width: calc(100% - var(--progress));" -}}
+        {{- $style = printf "%v%v" $style "width: calc(100% - var(--fi-progress));" -}}
       {{- end -}}
       {{- if .Light -}}
-        {{- $style = printf "%v--bg-progress: %v;" $style .Light -}}
+        {{- $style = printf "%v--fi-bg-progress: %v;" $style .Light -}}
       {{- end -}}
       {{- if .Dark -}}
-        {{- $style = printf "%v--bg-progress-dark: %v;" $style .Dark -}}
+        {{- $style = printf "%v--fi-bg-progress-dark: %v;" $style .Dark -}}
       {{- end -}}
       <div class="reading-progress-bar" {{ printf `style="%v"` $style | safeHTMLAttr }}></div>
     {{- end -}}

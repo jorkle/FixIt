@@ -1,4 +1,4 @@
-{{- $jsonViewer := .Attributes | merge (.Page.Param "jsonViewer") -}}
+{{- $jsonViewer := .Attributes | merge .Page.Params.jsonViewer | merge .Page.Site.Params.jsonViewer -}}
 {{- if $jsonViewer.enable -}}
   {{- $attrs := printf `expand-depth="%v"` $jsonViewer.expanddepth -}}
   {{- $copyable := false -}}
@@ -17,6 +17,5 @@
     {{- site.Home.Store.Set "hasJsonViewer" true -}}
   {{- end -}}
 {{- else -}}
-  {{- $result := transform.HighlightCodeBlock . -}}
-  {{- $result.Wrapped -}}
+  {{- partial "plugin/code-block-wrapper.html" . -}}
 {{- end -}}

@@ -9,6 +9,8 @@
   {{- $toc := .Store.Get "toc" -}}
   {{- $tableOfContents := .Fragments.ToHTML ($toc.startlevel | int) ($toc.endlevel | int) ($toc.ordered | default false) -}}
   {{- $showToc := $toc.enable | and (ne $tableOfContents `<nav id="TableOfContents"></nav>`) -}}
+  {{- .Store.Set "showToc" $showToc -}}
+  {{- $tableOfContents = dict "Content" $tableOfContents "Ruby" $params.ruby "Fraction" $params.fraction "Fontawesome" $params.fontawesome | partial "function/content.html" | safeHTML -}}
 
   <aside class="aside-collection animate__animated animate__fadeIn animate__faster" aria-label="{{ T "collections" }}">
     {{- /* Collection List */ -}}
@@ -28,7 +30,7 @@
         {{- $repost := $params.repost | default dict -}}
         {{- with $repost -}}
           {{- if eq .Enable true -}}
-            {{- $icon := dict "Class" "fa-solid fa-share fa-fw" -}}
+            {{- $icon := dict "Class" "fa-solid fa-share" -}}
             {{- $iconTitle := cond (hasPrefix .Url "http") (printf "%v -> %v" (T "single.repost") .Url ) (T "single.repost") -}}
             {{- if hasPrefix .Url "http" -}}
               {{ dict "Destination" .Url "Icon" $icon "Class" "icon-repost" "Title" $iconTitle | partial "plugin/link.html" -}}
@@ -54,27 +56,27 @@
       <div class="post-meta-line">
         {{- with .PublishDate | dateFormat (.Site.Params.dateformat | default "2006-01-02") -}}
           <span title="{{ dict "Date" ("2006-01-02 15:04:05" | $.PublishDate.Format) | T "single.publishedOnDate" }}">
-            {{- dict "Class" "fa-solid fa-calendar-days fa-fw me-1" | partial "plugin/icon.html" -}}
+            {{- dict "Class" "fa-solid fa-calendar-days me-1" | partial "plugin/icon.html" -}}
             {{- printf `<time datetime="%v">%v</time>` . . | safeHTML -}}
           </span>&nbsp;
         {{- end -}}
-        {{- if ne .Lastmod.Unix .PublishDate.Unix }}
+        {{- if (ne .Lastmod.Unix .PublishDate.Unix) | and $params.showLastmod -}}
           {{- with .Lastmod | dateFormat (.Site.Params.dateformat | default "2006-01-02") -}}
             <span title="{{ dict "Date" ("2006-01-02 15:04:05" | $.Lastmod.Format) | T "single.updatedOnDate" }}">
-              {{- dict "Class" "fa-regular fa-calendar-check fa-fw me-1" | partial "plugin/icon.html" -}}
+              {{- dict "Class" "fa-regular fa-calendar-check me-1" | partial "plugin/icon.html" -}}
               {{- printf `<time datetime="%v">%v</time>` . . | safeHTML -}}
             </span>&nbsp;
           {{- end -}}
         {{- end -}}
         {{- if $params.wordCount -}}
           <span title="{{ T "single.wordCount" .WordCount }}">
-            {{- dict "Class" "fa-solid fa-pencil-alt fa-fw me-1" | partial "plugin/icon.html" -}}
+            {{- dict "Class" "fa-solid fa-pencil-alt me-1" | partial "plugin/icon.html" -}}
             {{- T "single.fuzzyWordCount" .FuzzyWordCount -}}
           </span>&nbsp;
         {{- end -}}
         {{- if $params.readingTime -}}
           <span>
-            {{- dict "Class" "fa-regular fa-clock fa-fw me-1" | partial "plugin/icon.html" -}}
+            {{- dict "Class" "fa-regular fa-clock me-1" | partial "plugin/icon.html" -}}
             {{- T "single.readingTime" .ReadingTime -}}
           </span>&nbsp;
         {{- end -}}
@@ -88,8 +90,8 @@
           {{- .Store.Set "commentExpired" true -}}
         {{- end -}}
         {{- $comment := .Store.Get "comment" | default dict -}}
-        {{- $visitorIcon := dict "Class" "fa-regular fa-eye fa-fw me-1" | partial "plugin/icon.html" -}}
-        {{- $commentIcon := dict "Class" "fa-regular fa-comments fa-fw me-1" | partial "plugin/icon.html" -}}
+        {{- $visitorIcon := dict "Class" "fa-regular fa-eye me-1" | partial "plugin/icon.html" -}}
+        {{- $commentIcon := dict "Class" "fa-regular fa-comments me-1" | partial "plugin/icon.html" -}}
         {{- /* Visitor Count */ -}}
         {{- if $comment.enable | and $comment.artalk.enable -}}
           <span class="comment-visitors" data-flag-title="{{ $title }}">
@@ -137,20 +139,18 @@
 
     {{- /* Featured image */ -}}
     {{- $image := $params.featuredimage -}}
-    {{- with dict "Path" $image "Resources" .Resources | partial "function/resource.html" }}
-      {{- $image = .RelPermalink }}
-    {{- end }}
-    {{- with .Resources.GetMatch "featured-image" -}}
-      {{- $image = .RelPermalink -}}
+    {{- $matches := slice -}}
+    {{- if .Resources.GetMatch "featured-image" -}}
+      {{- $matches = $matches | append "featured-image" -}}
     {{- end -}}
-    {{- with $image -}}
+    {{- if $image | or (gt (len $matches) 0) -}}
       <div class="featured-image">
         {{- $optim := slice 
-          (dict "Process" "resize 800x webp q75" "descriptor" "800w")
-          (dict "Process" "resize 1200x webp q75" "descriptor" "1200w")
-          (dict "Process" "resize 1600x webp q75" "descriptor" "1600w") 
+          (dict "Process" "resize 800x webp" "descriptor" "800w")
+          (dict "Process" "resize 1200x webp" "descriptor" "1200w")
+          (dict "Process" "resize 1600x webp" "descriptor" "1600w") 
         -}}
-        {{- dict "Src" . "Title" $.Description "OptimConfig" $optim | partial "plugin/image.html" -}}
+        {{- dict "Src" $image "Title" $.Description "Resources" .Resources "Matches" $matches "Loading" "eager" "Sizes" "(max-width: 680px) 100vw, (max-width: 960px) 80vw, (max-width: 1440px) 56vw, 800px" "OptimConfig" $optim | partial "plugin/image.html" -}}
       </div>
     {{- end -}}
 
@@ -162,20 +162,27 @@
           <span>{{ dict "Class" "details-icon fa-solid fa-angle-right" | partial "plugin/icon.html" }}</span>
         </div>
         <div class="details-content toc-content" id="toc-content-static">
-          {{- dict "Content" $tableOfContents "Ruby" $params.ruby "Fraction" $params.fraction "Fontawesome" $params.fontawesome | partial "function/content.html" | safeHTML -}}
+          {{- $tableOfContents -}}
         </div>
       </div>
+    {{- end -}}
+
+    {{- /* AI Summary */ -}}
+    {{- $summaryConfig := (.Params | merge .Site.Params).postSummary -}}
+    {{- if $summaryConfig.enable -}}
+      <div class="ai-summary"></div>
     {{- end -}}
 
     {{- /* Custom block before post content */ -}}
     {{- block "custom-post__content:before" . }}{{ end -}}
 
+    {{- /* Expiration Reminder */ -}}
+    {{- partial "single/expiration-reminder.html" . -}}
+
     {{- /* Content */ -}}
     {{- $content := dict "Content" .Content "Ruby" $params.ruby "Fraction" $params.fraction "Fontawesome" $params.fontawesome | partial "function/content.html" | safeHTML -}}
     <div class="content" id="content"{{ with $params.endFlag }} data-end-flag="{{ . }}"{{ end }}>
       {{- if not $params.password -}}
-        {{- /* Expiration Reminder */ -}}
-        {{- partial "single/expiration-reminder.html" . -}}
         {{- $content -}}
       {{- end -}}
     </div>
@@ -224,7 +231,7 @@
     {{- if $showToc -}}
       <h2 class="toc-title{{ with $params.password }} encrypted-hidden{{ end }}">
         {{- T "single.contents" -}}&nbsp;
-        {{- dict "Class" "toc-icon fa-solid fa-angle-down fa-fw" | partial "plugin/icon.html" -}}
+        {{- dict "Class" "toc-icon fa-solid fa-angle-down" | partial "plugin/icon.html" -}}
       </h2>
       <div class="toc-content{{ if eq $toc.auto false }} always-active{{ end }}{{ with $params.password }} encrypted-hidden{{ end }}" id="toc-content-auto"></div>
     {{- end -}}
@@ -232,4 +239,16 @@
     {{- /* Custom block after post toc */ -}}
     {{- block "custom-post__toc:after" . }}{{ end -}}
   </aside>
+
+  {{- /* TOC Dialog */ -}}
+  {{- if $showToc -}}
+    <dialog id="toc-dialog" aria-labelledby="toc-dialog-title" role="dialog">
+      <div class="toc">
+        <h2 class="toc-title">{{ T "single.contents" }}</h2>
+        <div class="toc-content" id="toc-content-drawer">
+          {{- replace $tableOfContents `id="TableOfContents"` "" | safeHTML -}}
+        </div>
+      </div>
+    </dialog>
+  {{- end -}}
 {{- end -}}

@@ -1,9 +1,9 @@
 {
   "name": "@hugo-fixit/core",
   "type": "module",
-  "version": "0.4.0-alpha.1",
+  "version": "0.4.5",
   "private": true,
-  "packageManager": "pnpm@10.5.2",
+  "packageManager": "pnpm@10.32.1",
   "description": "Hugo FixIt core theme component source files",
   "author": {
     "name": "Lruihao",
@@ -36,26 +36,21 @@
     "build": "pnpm build:demo && pnpm build:test && pnpm -F integration start",
     "preview": "serve public",
     "lint": "eslint --cache .",
-    "version": "pnpm -F versioning start prod && pnpm changelog -p",
+    "version": "pnpm -F versioning start prod",
     "postversion": "git push && git push --tags",
-    "changelog": "auto-changelog-plus",
+    "changelog": "auto-changelog-plus --starting-date 2021-12-18",
     "prepare": "simple-git-hooks"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^5.4.1",
-    "@types/node": "^24.7.2",
-    "auto-changelog-plus": "^1.2.1",
-    "eslint": "^9.37.0",
-    "lint-staged": "^16.2.4",
-    "serve": "^14.2.5",
+    "@antfu/eslint-config": "^7.7.3",
+    "@types/node": "^25.5.0",
+    "auto-changelog-plus": "^1.2.3",
+    "eslint": "^10.0.3",
+    "lint-staged": "^16.4.0",
+    "serve": "^14.2.6",
     "simple-git-hooks": "^2.13.1",
-    "tsx": "^4.20.6",
+    "tsx": "^4.21.0",
     "typescript": "^5.9.3"
-  },
-  "pnpm": {
-    "overrides": {
-      "on-headers": ">=1.1.0"
-    }
   },
   "simple-git-hooks": {
     "pre-commit": "pnpm -F versioning start dev && pnpm lint-staged"

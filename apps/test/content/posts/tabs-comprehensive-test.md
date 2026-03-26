@@ -2,7 +2,6 @@
 title: Tabs Comprehensive Test Cases
 date: 2025-09-09T10:00:00+08:00
 collections:
-
 - Tests
 categories:
 - Shortcodes
@@ -143,4 +142,90 @@ Content for vertical nested tab B.
 
 {{% /tab %}}
 
+{{< /tabs >}}
+
+## Others
+
+### Mermaid Diagram inside Tabs
+
+{{< tabs >}}
+{{% tab title="Flowchart" %}}
+
+```mermaid
+flowchart TD
+    A[Start] --> B{Is it?}
+    B -->|Yes| C[OK]
+    C --> D[Rethink]
+    D --> B
+    B ---->|No| E[End]
+```
+
+{{% /tab %}}
+{{% tab title="Gantt Chart" %}}
+
+```mermaid
+gantt
+    title A Gantt Diagram
+    dateFormat  YYYY-MM-DD
+    section Section
+    A task           :a1, 2014-01-01, 30d
+    Another task     :after a1  , 20d
+    section Another
+    Task in sec      :2014-01-12  , 12d
+    another task      : 24d
+```
+
+{{% /tab %}}
+{{< /tabs >}}
+
+### File Tree inside Tabs
+
+{{< tabs >}}
+{{% tab title="File Tree Shortcode" %}}
+
+{{< file-tree >}}
+[[filetree]]
+name = "src"
+type = "dir"
+
+[[filetree.children]]
+name = "index.ts"
+type = "file"
+
+[[filetree]]
+name = "README.md"
+type = "file"
+{{< /file-tree >}}
+
+{{% /tab %}}
+{{% tab title="File Tree Code Block" %}}
+
+```file-tree
+[[filetree]]
+name = "src"
+type = "dir"
+
+[[filetree.children]]
+name = "index.ts"
+type = "file"
+
+[[filetree]]
+name = "README.md"
+type = "file"
+```
+
+{{% /tab %}}
+{{< /tabs >}}
+
+### MathJax inside tabs
+
+{{< tabs >}}
+{{% tab title="Inline" %}}
+$c = \pm\sqrt{a^2 + b^2}$ and \(f(x)=\int_{-\infty}^{\infty} \hat{f}(\xi) e^{2 \pi i \xi x} d \xi\)
+{{% /tab %}}
+{{% tab title="Block" %}}
+$$ x = {-b \pm \sqrt{b^2-4ac} \over 2a} $$
+
+\[ f(a) = \frac{1}{2\pi i} \oint\frac{f(z)}{z-a}dz \]
+{{% /tab %}}
 {{< /tabs >}}

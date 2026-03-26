@@ -13,7 +13,7 @@
   <a href="https://fixit.lruihao.cn/ecosystem/hugo-fixit/fixit/?lang=russian">Русский язык</a> |
   <a href="https://fixit.lruihao.cn/ecosystem/hugo-fixit/fixit/?lang=spanish">Español</a> |
   <a href="https://fixit.lruihao.cn/ecosystem/hugo-fixit/fixit/?lang=hindi">हिन्दी</a> |
-  <a href="https://fixit.lruihao.cn/ecosystem/hugo-fixit/fixit/?lang=german">deutsch</a> |
+  <a href="https://fixit.lruihao.cn/ecosystem/hugo-fixit/fixit/?lang=deutsch">deutsch</a> |
   <a href="https://fixit.lruihao.cn/ecosystem/hugo-fixit/fixit/?lang=korean">한국어</a> |
   <a href="https://fixit.lruihao.cn/ecosystem/hugo-fixit/fixit/?lang=japanese">しろうと</a>
 </div>
@@ -26,7 +26,7 @@
 
 [![Build](https://img.shields.io/github/deployments/hugo-fixit/FixIt/Production?style=flat&label=Build&logo=vercel)](https://demo.fixit.lruihao.cn/)
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/hugo-fixit/FixIt?style=flat&label=Release&logo=github&include_prereleases)](https://github.com/hugo-fixit/FixIt/releases)
-[![Hugo](https://img.shields.io/badge/Hugo-%5E0.147.7-ff4088?style=flat&logo=hugo)](https://gohugo.io/)
+[![Hugo](https://img.shields.io/badge/Hugo-%5E0.156.0-ff4088?style=flat&logo=hugo)](https://gohugo.io/)
 [![License](https://img.shields.io/github/license/hugo-fixit/FixIt?style=flat&label=License)](/LICENSE)
 [![GitHub stars](https://img.shields.io/github/stars/hugo-fixit/FixIt?style=social)](https://github.com/hugo-fixit/FixIt)
 [![Gitee star of FixIt](https://gitee.com/lruihao/FixIt/badge/star.svg)](https://gitee.com/lruihao/FixIt/stargazers)
@@ -147,6 +147,7 @@ pnpx fixit-cli create my-blog
 - 支持基于 [mermaid](https://github.com/knsv/mermaid) 的**图表** 代码块扩展语法和 shortcode
 - 支持基于 [ECharts](https://echarts.apache.org/) 的**交互式数据可视化** 代码块扩展语法和 shortcode
 - 支持 **Timeline** 的代码块扩展语法和 shortcode
+- 支持 **文件树** 的代码块扩展语法和 shortcode
 - 支持基于 [Mapbox GL JS](https://docs.mapbox.com/mapbox-gl-js) 的 **Mapbox** shortcode
 - 支持基于 [APlayer](https://github.com/MoePlayer/APlayer) 和 [MetingJS](https://github.com/metowolf/MetingJS) 的**音乐播放器** shortcode
 - 支持 **Bilibili 视频** 和 **抖音视频** shortcode
@@ -183,6 +184,8 @@ FixIt 主题多语言基本配置及自动翻译等详见 [内容管理](https:/
 - 罗马尼亚语
 - 越南语
 - 印地语
+- 日语
+- 韩语
 
 </details>
 
@@ -200,6 +203,8 @@ FixIt 主题旨在在**简洁性**和**可扩展性**之间取得平衡。为此
   🐟 A canvas implemented animation effect of small fish swimming.
 - [cmpt-mdevtools](https://github.com/hugo-fixit/cmpt-mdevtools)\
   Mobile devtools component powered by vConsole and eruda.
+- [cmpt-santa-hat](https://github.com/hugo-fixit/cmpt-santa-hat)\
+  A Christmas Easter Egg by JavaScript.
 - [cmpt-translate](https://github.com/hugo-fixit/cmpt-translate)\
   🌐 A component for site automatic translation.
 - [component-projects](https://github.com/hugo-fixit/component-projects)\

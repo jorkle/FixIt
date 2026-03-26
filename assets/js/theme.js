@@ -1,27 +1,40 @@
 // TODO use ESLint to check the code style
-import Util from './util';
+import {
+  forEach,
+  getScrollTop,
+  isMobile,
+  isTocStatic,
+  animateCSS,
+  isValidDate,
+  scrollIntoView,
+  getStagingDOM,
+  createCopyText,
+  isObjectLiteral,
+  HTMLEscape,
+} from './utils/common';
+import FileTree from './lib/file-tree.js'
+
+const copyText = createCopyText();
 
 class FixIt {
   constructor() {
     this.config = window.config;
     this.isDark = document.documentElement.dataset.theme === 'dark';
-    this.util = new Util();
-    this.newScrollTop = this.util.getScrollTop();
+    this.newScrollTop = getScrollTop();
     this.oldScrollTop = this.newScrollTop;
     this.scrollEventSet = new Set();
     this.resizeEventSet = new Set();
     this.switchThemeEventSet = new Set();
     this.clickMaskEventSet = new Set();
     this.beforeprintEventSet = new Set();
+    this.afterprintEventSet = new Set();
     this.disableScrollEvent = false;
     window.objectFitImages && objectFitImages();
   }
 
   initThemeColor() {
     const $meta = document.querySelector('[name="theme-color"]');
-    if (!$meta) {
-      return;
-    }
+    if (!$meta) return;
     this._themeColorOnSwitchTheme = this._themeColorOnSwitchTheme || (() => {
       $meta.content = this.isDark ? $meta.dataset.dark : $meta.dataset.light;
     });
@@ -30,7 +43,7 @@ class FixIt {
   }
 
   initSVGIcon() {
-    this.util.forEach(document.querySelectorAll('[data-svg-src]'), ($icon) => {
+    forEach(document.querySelectorAll('[data-svg-src]'), ($icon) => {
       fetch($icon.dataset.svgSrc)
         .then((response) => response.text())
         .then((svg) => {
@@ -49,7 +62,7 @@ class FixIt {
     });
   }
 
-  initTwemoji(target = document.body) {
+  initTwemoji(target = document) {
     this.config.twemoji && twemoji.parse(target);
   }
 
@@ -59,7 +72,7 @@ class FixIt {
   }
 
   initMenuDesktop() {
-    this.util.forEach(document.querySelectorAll('.has-children'), ($item) => {
+    forEach(document.querySelectorAll('.has-children'), ($item) => {
       $item.querySelector('.sub-menu').style.minWidth = `${$item.offsetWidth - 8}px`;
     });
   }
@@ -79,7 +92,7 @@ class FixIt {
     });
     this.clickMaskEventSet.add(this._menuMobileOnClickMask);
     // add nested menu toggler
-    this.util.forEach(document.querySelectorAll('.menu-item>.nested-item'), ($nestedItem) => {
+    forEach(document.querySelectorAll('.menu-item>.nested-item'), ($nestedItem) => {
       $nestedItem.addEventListener('click', function () {
         this.parentNode.querySelector('.sub-menu').classList.toggle('open');
         this.querySelector('.dropdown-icon').classList.toggle('open');
@@ -88,9 +101,10 @@ class FixIt {
   }
 
   initSwitchTheme() {
-    this.util.forEach(document.getElementsByClassName('theme-switch'), ($themeSwitch) => {
+    forEach(document.getElementsByClassName('theme-switch'), ($themeSwitch) => {
       $themeSwitch.addEventListener('click', () => {
         document.documentElement.dataset.theme = this.isDark ? 'light' : 'dark';
+        document.documentElement.style.setProperty('color-scheme', this.isDark ? 'light' : 'dark');
         this.isDark = !this.isDark;
         window.localStorage?.setItem('theme', this.isDark ? 'dark' : 'light');
         for (let event of this.switchThemeEventSet) {
@@ -100,12 +114,47 @@ class FixIt {
     });
   }
 
+  /**
+   * Helper method to apply highlight tags to text based on match indices
+   * @param {String} text - The text to highlight
+   * @param {Array} indices - Array of match indices
+   * @param {String} highlightTag - The HTML tag to use for highlighting
+   * @returns {String} The highlighted text
+   */
+  _applyHighlightToText(text, indices, highlightTag) {
+    let offset = 0;
+    for (let i = 0; i < indices.length; i++) {
+      const substr = text.substring(indices[i][0] + offset, indices[i][1] + 1 + offset);
+      const tag = `<${highlightTag}>` + substr + `</${highlightTag}>`;
+      text = text.substring(0, indices[i][0] + offset) + tag + text.substring(indices[i][1] + 1 + offset, text.length);
+      offset += highlightTag.length * 2 + 5;
+    }
+    return text;
+  }
+
+  /**
+   * Helper method to reset search UI elements
+   * @param {Element} $header - The header element
+   * @param {Element} $searchLoading - The loading indicator element
+   * @param {Element} $searchClear - The clear button element
+   * @param {Object} searchInstance - The search autocomplete instance
+   */
+  _resetSearchUI($header, $searchLoading, $searchClear, searchInstance) {
+    $header.classList.remove('open');
+    $searchLoading.style.display = 'none';
+    $searchClear.style.display = 'none';
+    searchInstance && searchInstance.autocomplete.setVal('');
+  }
+
   initSearch() {
     const searchConfig = this.config.search;
-    const isMobile = this.util.isMobile();
-    if (!searchConfig || (isMobile && this._searchMobileOnce) || (!isMobile && this._searchDesktopOnce)) {
+    const _isMobile = isMobile();
+    if (
+      !searchConfig ||
+      (_isMobile && this._searchMobileOnce) ||
+      (!_isMobile && this._searchDesktopOnce)
+    )
       return;
-    }
     // Initialize default search config
     const maxResultLength = searchConfig.maxResultLength ?? 10;
     const snippetLength = searchConfig.snippetLength ?? 50;
@@ -119,7 +168,7 @@ class FixIt {
     const ignoreLocation = searchConfig.ignoreLocation ?? false;
     const useExtendedSearch = searchConfig.useExtendedSearch ?? false;
     const ignoreFieldNorm = searchConfig.ignoreFieldNorm ?? false;
-    const suffix = isMobile ? 'mobile' : 'desktop';
+    const suffix = _isMobile ? 'mobile' : 'desktop';
     const $header = document.getElementById(`header-${suffix}`);
     const $searchInput = document.getElementById(`search-input-${suffix}`);
     const $searchToggle = document.getElementById(`search-toggle-${suffix}`);
@@ -129,7 +178,7 @@ class FixIt {
 
     // goto the PostChat panel rather than search results
     if (searchConfig.type === 'post-chat' && window.postChatUser) {
-      if (isMobile) {
+      if (_isMobile) {
         $searchInput.addEventListener('focus', () => {
           window.postChatUser.setSearchInput('');
         }, false);
@@ -138,10 +187,10 @@ class FixIt {
           window.postChatUser.setSearchInput('');
         }, false);
       }
-      return;      
+      return;
     }
 
-    if (isMobile) {
+    if (_isMobile) {
       this._searchMobileOnce = true;
       $searchInput.addEventListener('focus', () => {
         this.disableScrollEvent = true;
@@ -150,23 +199,17 @@ class FixIt {
       }, false);
       $searchCancel.addEventListener('click', () => {
         this.disableScrollEvent = false;
-        $header.classList.remove('open');
         document.body.classList.remove('blur');
         document.getElementById('menu-toggle-mobile').classList.remove('active');
         document.getElementById('menu-mobile').classList.remove('active');
-        $searchLoading.style.display = 'none';
-        $searchClear.style.display = 'none';
-        this._searchMobile && this._searchMobile.autocomplete.setVal('');
+        this._resetSearchUI($header, $searchLoading, $searchClear, this._searchMobile);
       }, false);
       $searchClear.addEventListener('click', () => {
         $searchClear.style.display = 'none';
         this._searchMobile && this._searchMobile.autocomplete.setVal('');
       }, false);
       this._searchMobileOnClickMask = this._searchMobileOnClickMask || (() => {
-        $header.classList.remove('open');
-        $searchLoading.style.display = 'none';
-        $searchClear.style.display = 'none';
-        this._searchMobile && this._searchMobile.autocomplete.setVal('');
+        this._resetSearchUI($header, $searchLoading, $searchClear, this._searchMobile);
       });
       this.clickMaskEventSet.add(this._searchMobileOnClickMask);
     } else {
@@ -182,12 +225,9 @@ class FixIt {
         $searchClear.style.display = 'none';
         this._searchDesktop && this._searchDesktop.autocomplete.setVal('');
       }, false);
-      this._searchDesktopOnClickMask = this._searchDesktopOnClickMask ||(() => {
-          $header.classList.remove('open');
-          $searchLoading.style.display = 'none';
-          $searchClear.style.display = 'none';
-          this._searchDesktop && this._searchDesktop.autocomplete.setVal('');
-        });
+      this._searchDesktopOnClickMask = this._searchDesktopOnClickMask || (() => {
+        this._resetSearchUI($header, $searchLoading, $searchClear, this._searchDesktop);
+      });
       this.clickMaskEventSet.add(this._searchDesktopOnClickMask);
     }
     $searchInput.addEventListener('input', () => {
@@ -217,12 +257,17 @@ class FixIt {
             };
             if (searchConfig.type === 'algolia') {
               this._algoliaIndex =
-                this._algoliaIndex || algoliasearch(searchConfig.algoliaAppID, searchConfig.algoliaSearchKey).initIndex(searchConfig.algoliaIndex);
+                this._algoliaIndex ||
+                algoliasearch(
+                  searchConfig.algoliaAppID,
+                  searchConfig.algoliaSearchKey
+                ).initIndex(searchConfig.algoliaIndex);
               this._algoliaIndex
                 .search(query, {
                   offset: 0,
                   length: maxResultLength * 8,
                   attributesToHighlight: ['title'],
+                  attributesToRetrieve: ['*'],
                   attributesToSnippet: [`content:${snippetLength}`],
                   highlightPreTag: `<${highlightTag}>`,
                   highlightPostTag: `</${highlightTag}>`
@@ -230,9 +275,7 @@ class FixIt {
                 .then(({ hits }) => {
                   const results = {};
                   hits.forEach(({ uri, date, _highlightResult: { title }, _snippetResult: { content } }) => {
-                    if (results[uri] && results[uri].context.length > content.value) {
-                      return;
-                    }
+                    if (results[uri] && results[uri].context.length > content.value) return;
                     results[uri] = {
                       uri: uri,
                       title: title.value,
@@ -251,24 +294,12 @@ class FixIt {
                 const results = {};
                 window._index.search(query).forEach(({ item, refIndex, matches }) => {
                   let title = item.title;
-                  let content = item.content.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                  let content = item.content;
                   matches.forEach(({ indices, value, key }) => {
                     if (key === 'content') {
-                      let offset = 0;
-                      for (let i = 0; i < indices.length; i++) {
-                        const substr = content.substring(indices[i][0] + offset, indices[i][1] + 1 + offset);
-                        const tag = `<${highlightTag}>` + substr + `</${highlightTag}>`;
-                        content = content.substring(0, indices[i][0] + offset) + tag + content.substring(indices[i][1] + 1 + offset, content.length);
-                        offset += highlightTag.length * 2 + 5;
-                      }
+                      content = this._applyHighlightToText(content, indices, highlightTag);
                     } else if (key === 'title') {
-                      let offset = 0;
-                      for (let i = 0; i < indices.length; i++) {
-                        const substr = title.substring(indices[i][0] + offset, indices[i][1] + 1 + offset);
-                        const tag = `<${highlightTag}>` + substr + `</${highlightTag}>`;
-                        title = title.substring(0, indices[i][0] + offset) + tag + title.substring(indices[i][1] + 1 + offset, content.length);
-                        offset += highlightTag.length * 2 + 5;
-                      }
+                      title = this._applyHighlightToText(title, indices, highlightTag);
                     }
                   });
                   results[item.uri] = {
@@ -322,15 +353,15 @@ class FixIt {
             }
           },
           templates: {
-            suggestion: ({ title, date, context }) =>
-              `<div><span class="suggestion-title">${title}</span><span class="suggestion-date">${date}</span></div><div class="suggestion-context">${context}</div>`,
-            empty: ({ query }) => `<div class="search-empty">${searchConfig.noResultsFound}: <span class="search-query">"${query}"</span></div>`,
-            footer: ({}) => {
+            suggestion: ({ title, uri, date, context }) =>
+              `<div><a href="${uri}"><span class="suggestion-title">${title}</span></a><span class="suggestion-date">${date}</span></div><div class="suggestion-context">${context}</div>`,
+            empty: ({ query }) => `<div class="search-empty">${searchConfig.noResultsFound}: <span class="search-query">"${HTMLEscape(query)}"</span></div>`,
+            footer: ({ }) => {
               let searchType, icon, href;
               switch (searchConfig.type) {
                 case 'algolia':
                   searchType = 'algolia';
-                  icon = '<i class="fa-brands fa-algolia fa-fw" aria-hidden="true"></i>';
+                  icon = '<i class="fa-brands fa-algolia" aria-hidden="true"></i>';
                   href = 'https://www.algolia.com/';
                   break;
                 case 'fuse':
@@ -341,7 +372,7 @@ class FixIt {
                 case 'cse':
                   if (this.config.cse.engine === 'google') {
                     searchType = 'Google CSE';
-                    icon = '<i class="fa-brands fa-google fa-fw" aria-hidden="true"></i>';
+                    icon = '<i class="fa-brands fa-google" aria-hidden="true"></i>';
                     href = 'https://programmablesearchengine.google.com/';
                   }
                   break;
@@ -356,9 +387,10 @@ class FixIt {
         }
       );
       autosearch.on('autocomplete:selected', (_event, suggestion, _dataset, _context) => {
+        document.getElementById('mask')?.click();
         window.location.assign(suggestion.uri);
       });
-      if (isMobile) {
+      if (_isMobile) {
         this._searchMobile = autosearch;
       } else {
         this._searchDesktop = autosearch;
@@ -376,7 +408,7 @@ class FixIt {
   }
 
   initDetails(target = document) {
-    this.util.forEach(target.querySelectorAll('.details:not(.disabled)'), ($details) => {
+    forEach(target.querySelectorAll('.details:not(.disabled)'), ($details) => {
       const $summary = $details.querySelector('.details-summary');
       $summary.addEventListener('click', () => {
         $details.classList.toggle('open');
@@ -405,116 +437,316 @@ class FixIt {
   }
 
   /**
+   * init copy code button for code blocks in all modes (classic and non-classic)
+   * @param {HTMLElement} codeBlock code block wrapper element
+   * @param {HTMLElement} codePreEl single code block pre element
+   */
+  initCopyCode(codeBlock, codePreEl) {
+    const copyBtn = codeBlock.dataset.mode === 'classic'
+      ? codeBlock.querySelector('.code-header .copy-btn')
+      : codeBlock.querySelector('.code-copy-btn');
+    if (codeBlock.dataset.copyable !== 'true' || !copyBtn) return;
+    copyBtn.addEventListener('click', () => {
+      const iswWrap = codeBlock.classList.contains('line-wrapping');
+      const highlightLines = codeBlock.querySelectorAll('.hl');
+      iswWrap && codeBlock.classList.toggle('line-wrapping');
+      forEach(highlightLines, $hl => $hl.classList.toggle('hl'));
+      copyText(codePreEl.innerText.trim()).then(() => {
+        animateCSS(codePreEl, 'animate__flash');
+        iswWrap && codeBlock.classList.toggle('line-wrapping');
+        forEach(highlightLines, $hl => $hl.classList.toggle('hl'));
+        const copiedText = copyBtn.dataset.copiedText;
+        const originalTitle = copyBtn.dataset.ctOriginalTitle;
+        copyBtn.toggleAttribute('data-copied', true);
+        copyBtn.dataset.ctTitle = copiedText;
+        const instance = window.CellTooltip.getOrCreateInstance(copyBtn);
+        instance.refresh();
+        setTimeout(() => {
+          copyBtn.toggleAttribute('data-copied', false);
+          copyBtn.dataset.ctTitle = originalTitle;
+          instance.hide();
+        }, 2000);
+      }, () => {
+        console.error('Clipboard write failed!', 'Your browser does not support clipboard API!');
+      });
+    }, false);
+  }
+
+  initCodeExpandBtn(codeBlock) {
+    codeBlock.querySelector('.code-expand-btn')?.addEventListener('click', () => {
+      codeBlock.classList.toggle('is-expanded');
+    }, false);
+  }
+
+  initDownloadCode(codeBlock, codePreEl) {
+    const downloadBtn = codeBlock.querySelector('.code-header .download-btn');
+    if (!downloadBtn) return;
+    downloadBtn.addEventListener('click', () => {
+      const $codeHeader = codeBlock.querySelector('.code-header');
+      const name = codeBlock.dataset.name?.trim();
+      const language = Array.from($codeHeader?.classList || []).find((className) => className.startsWith('language-'))?.replace('language-', '');
+      const ext = language && language !== 'fallback' ? language : 'txt';
+      const fallbackName = name
+        ? (name.includes('.') ? name : `${name}.${ext}`)
+        : `code.${ext}`;
+      const fileName = codeBlock.getAttribute('filename')?.trim();
+      const blob = new Blob([codePreEl.innerText], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = (fileName || fallbackName).replace(/[\\/:*?"<>|\r\n]+/g, '-');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      downloadBtn.toggleAttribute('data-downloaded', true);
+      downloadBtn.classList.toggle('fa-spin', true);
+      setTimeout(() => {
+        downloadBtn.toggleAttribute('data-downloaded', false);
+        downloadBtn.classList.toggle('fa-spin', false);
+      }, 300);
+    }, false);
+  }
+
+  _setCodeFullscreenState(codeBlock, show) {
+    const fullscreenBtn = codeBlock.querySelector('.code-header .fullscreen-btn');
+    const hasExpandBtn = !!codeBlock.querySelector('.code-expand-btn');
+    if (show && hasExpandBtn) {
+      codeBlock.dataset.fullscreenExpanded = codeBlock.classList.contains('is-expanded') ? 'true' : 'false';
+      codeBlock.classList.add('is-expanded');
+    }
+    if (!show && codeBlock.classList.contains('is-fullscreen')) {
+      codeBlock.classList.add('instant-height');
+      if (hasExpandBtn && codeBlock.dataset.fullscreenExpanded === 'false') {
+        codeBlock.classList.remove('is-expanded');
+      }
+      delete codeBlock.dataset.fullscreenExpanded;
+      window.requestAnimationFrame(() => {
+        codeBlock.classList.remove('instant-height');
+      });
+    }
+    codeBlock.classList.toggle('is-fullscreen', show);
+    fullscreenBtn?.toggleAttribute('data-fullscreen', show);
+    const hasFullscreenCode = !!document.querySelector('.code-block.highlight.is-fullscreen');
+    document.documentElement.style.overflow = hasFullscreenCode ? 'hidden' : '';
+  }
+
+  closeCodeFullscreen() {
+    const $activeCodeBlock = document.querySelector('.code-block.highlight.is-fullscreen');
+    if (!$activeCodeBlock) return;
+    this._setCodeFullscreenState($activeCodeBlock, false);
+  }
+
+  initFullscreenCode(codeBlock) {
+    const fullscreenBtn = codeBlock.querySelector('.code-header .fullscreen-btn');
+    if (!fullscreenBtn) return;
+    fullscreenBtn.addEventListener('click', () => {
+      const isFullscreen = codeBlock.classList.contains('is-fullscreen');
+      if (isFullscreen) {
+        this._setCodeFullscreenState(codeBlock, false);
+        return;
+      }
+      this.closeCodeFullscreen();
+      codeBlock.classList.remove('is-collapsed');
+      this._setCodeFullscreenState(codeBlock, true);
+    }, false);
+    if (!this._codeFullscreenOnEsc) {
+      this._codeFullscreenOnEsc = (event) => {
+        if (event.key === 'Escape') {
+          this.closeCodeFullscreen();
+        }
+      };
+      document.addEventListener('keydown', this._codeFullscreenOnEsc, false);
+    }
+  }
+
+  /**
    * init code wrapper
    */
   initCodeWrapper() {
-    if (!this.config.code) {
-      this.initCopyCode();
-      return
-    }
-    // if markup.highlight.lineNumbersInTable set to false
-    this.util.forEach(document.querySelectorAll('.highlight > pre.chroma'), ($preChroma) => {
-      const $chroma = document.createElement('div');
-      $chroma.className = $preChroma.className;
-      const $table = document.createElement('table');
-      $chroma.appendChild($table);
-      const $tbody = document.createElement('tbody');
-      $table.appendChild($tbody);
-      const $tr = document.createElement('tr');
-      $tbody.appendChild($tr);
-      const $td = document.createElement('td');
-      $tr.appendChild($td);
-      $preChroma.parentElement.replaceChild($chroma, $preChroma);
-      $td.appendChild($preChroma);
-    });
-    // render code header
-    this.util.forEach(document.querySelectorAll('.highlight > .chroma:not([data-init])'), ($chroma) => {
-      $chroma.dataset.init = 'true';
-      if ($chroma.parentElement.classList.contains('no-header')) {
-        this.initCopyCode($chroma);
-        return;
-      }
-      const $codeElements = $chroma.querySelectorAll('pre.chroma > code');
-      if ($codeElements.length) {
-        const $code = $codeElements[$codeElements.length - 1];
-        const $header = document.createElement('div');
-        $header.className = 'code-header ' + $code.className.toLowerCase();
+    const $codeBlocks = document.querySelectorAll('.code-block.highlight:not([data-init])');
+    forEach($codeBlocks, ($codeBlock) => {
+      const $preElements = $codeBlock.querySelectorAll('pre.chroma');
+      if (!$preElements.length) return;
+      const $codePreEl = $preElements[$preElements.length - 1];
+      $codeBlock.dataset.init = 'true';
+
+      this.initCopyCode($codeBlock, $codePreEl);
+      this.initCodeExpandBtn($codeBlock);
+
+      // classic mode code block interactions
+      if ($codeBlock.dataset.mode === 'classic') {
+        const $codeHeader = $codeBlock.querySelector('.code-header');
+        if (!$codeHeader) return;
+        this.initDownloadCode($codeBlock, $codePreEl);
+        this.initFullscreenCode($codeBlock);
         // code title
-        const $title = document.createElement('span');
-        $title.classList.add('code-title');
-        // insert code title inner
-        $title.insertAdjacentHTML(
-          'afterbegin',
-          $chroma.parentNode.title
-            ? `<i class="arrow fa-solid fa-chevron-right fa-fw" aria-hidden="true"></i><span class="title-inner">${$chroma.parentNode.title}</span>`
-            : '<i class="arrow fa-solid fa-chevron-right fa-fw" aria-hidden="true"></i>'
-        );
-        $title.addEventListener('click', () => {
-          $chroma.classList.toggle('open');
+        $codeHeader.querySelector('.code-title').addEventListener('click', () => {
+          if ($codeBlock.classList.contains('is-fullscreen')) return;
+          $codeBlock.classList.toggle('is-collapsed');
         }, false);
-        $header.appendChild($title);
         // ellipses icon
-        const $ellipses = document.createElement('span');
-        $ellipses.insertAdjacentHTML('afterbegin', '<i class="fa-solid fa-ellipsis-h fa-fw" aria-hidden="true"></i>');
-        $ellipses.classList.add('ellipses');
-        $ellipses.addEventListener('click', () => {
-          $chroma.classList.add('open');
+        $codeHeader.querySelector('.ellipses-btn').addEventListener('click', () => {
+          $codeBlock.classList.remove('is-collapsed');
         }, false);
-        $header.appendChild($ellipses);
-        // edit button
-        if (this.config.code.editable) {
-          const $edit = document.createElement('span');
-          $edit.classList.add('edit');
-          $edit.insertAdjacentHTML('afterbegin', `<i class="fa-solid fa-pen-to-square fa-fw" title="${this.config.code.editUnLockTitle}" aria-hidden="true"></i>`);
-          $edit.addEventListener('click', () => {
-            const $iconKey = $edit.querySelector('.fa-pen-to-square');
-            const $iconLock = $edit.querySelector('.fa-lock');
-            const $preChromas = $edit.parentElement.parentElement.querySelectorAll('pre.chroma');
-            const $preChroma = $preChromas.length === 2 ? $preChromas[1] : $preChromas[0];
-            if ($iconKey) {
-              $iconKey.classList.add('fa-lock');
-              $iconKey.classList.remove('fa-pen-to-square');
-              $iconKey.title = this.config.code.editLockTitle;
-              $preChroma.setAttribute('contenteditable', true);
-              $preChroma.focus();
+        // line numbers toggle button
+        $codeHeader.querySelector('.line-nos-btn')?.addEventListener('click', () => {
+          $codeBlock.classList.toggle('line-nos-hidden');
+        }, false);
+        // line wrapping toggle button
+        $codeHeader.querySelector('.line-wrap-btn')?.addEventListener('click', () => {
+          $codeBlock.classList.toggle('line-wrapping');
+        }, false);
+        // edit button toggle button
+        if ($codeBlock.dataset.editable === 'true') {
+          $codeHeader.querySelector('.edit-btn')?.addEventListener('click', () => {
+            const isEditable = $codePreEl.getAttribute('contenteditable') === 'true'
+            if (isEditable) {
+              $codePreEl.setAttribute('contenteditable', false);
+              $codePreEl.blur();
             } else {
-              $iconLock.classList.add('fa-pen-to-square');
-              $iconLock.classList.remove('fa-lock');
-              $iconLock.title = this.config.code.editUnLockTitle;
-              $preChroma.setAttribute('contenteditable', false);
-              $preChroma.blur();
+              forEach($codeBlock.querySelectorAll('.hl'), ($hl) => {
+                $hl.classList.remove('hl');
+              });
+              $codeBlock.classList.add('is-expanded');
+              $codePreEl.setAttribute('contenteditable', true);
+              $codePreEl.focus();
             }
           }, false);
-          $header.appendChild($edit);
         }
-        // copy button
-        if (this.config.code.copyTitle) {
-          const $copy = document.createElement('span');
-          $copy.insertAdjacentHTML('afterbegin', '<i class="fa-regular fa-copy fa-fw" aria-hidden="true"></i>');
-          $copy.classList.add('copy');
-          // remove the leading and trailing whitespace of the code string
-          let code = $code.innerText.trim();
-          // in the details element, the code string cannot be gotten directly.
-          if ($chroma.closest('details') !== null) {
-            const _tempEl = document.createElement('div');
-            _tempEl.appendChild($code.cloneNode(true));
-            code = _tempEl.innerText.trim();
+      }
+    });
+  }
+
+  /**
+   * init code tabs
+   */
+  initCodeTabs() {
+    const $codeBlocks = document.querySelectorAll('.code-block[group]:not([data-tab-init])');
+    const processed = new Set();
+    
+    forEach($codeBlocks, ($block) => {
+      if (processed.has($block)) return;
+      
+      const groupName = $block.getAttribute('group');
+      const $tabs = [];
+      let $curr = $block;
+      
+      // collect consecutive blocks with same group
+      while ($curr && $curr.classList?.contains('code-block') && $curr.getAttribute('group') === groupName) {
+        $tabs.push($curr);
+        processed.add($curr);
+        $curr = $curr.nextElementSibling;
+      }
+      
+      if ($tabs.length < 2) return;
+      
+      // create DOM structure
+      const $container = document.createElement('div');
+      $container.className = 'code-tabs';
+      
+      const $header = document.createElement('div');
+      $header.className = 'tabs-header';
+      
+      const $items = document.createElement('div');
+      $items.className = 'tabs-items';
+
+      const $actions = document.createElement('div');
+      $actions.className = 'tabs-actions';
+
+      $header.appendChild($items);
+      $header.appendChild($actions);
+      
+      const $content = document.createElement('div');
+      $content.className = 'tabs-content';
+
+      // insert container before the first block
+      const $firstBlock = $tabs[0];
+      $firstBlock.parentNode.insertBefore($container, $firstBlock);
+
+      const activeTabIndex = $tabs.findIndex(tab => tab.classList.contains('active'));
+      const langPref = window.localStorage.getItem('config_lang_perf');
+      const hasCodeToggle = $tabs.some(tab => tab.dataset.codeToggle === 'true');
+      const langPrefIndex = (langPref && hasCodeToggle) ? $tabs.findIndex(tab => tab.dataset.tabTitle.toLowerCase() === langPref) : -1;
+      const resolvedIndex = langPrefIndex !== -1 ? langPrefIndex : activeTabIndex;
+      const beforeTabs = $tabs[0]?.getAttribute('before_tabs');
+      if (beforeTabs) {
+        const $before = document.createElement('span');
+        $before.className = 'before-tabs';
+        $before.textContent = beforeTabs;
+        $items.appendChild($before);
+      }
+      $tabs.forEach(($tab, index) => {
+        const title = $tab.dataset.tabTitle || 'Code';
+        const defaultActiveTab = resolvedIndex === -1 && index === 0;
+        
+        // tab button
+        const $btn = document.createElement('span');
+        $btn.className = 'tab-item';
+        if (defaultActiveTab) $btn.classList.add('active');
+        $btn.textContent = title;
+        $btn.dataset.index = index;
+        $btn.title = title;
+
+        $btn.addEventListener('click', () => {
+          // 1. restore buttons to the currently active tab
+          const $activeTab = $tabs.find(t => t.classList.contains('active'));
+          if ($activeTab) {
+            const $activeHeader = $activeTab.querySelector('.code-header');
+            if ($activeHeader) {
+              Array.from($actions.children).forEach(btn => $activeHeader.appendChild(btn));
+            }
           }
-          const forceOpen = $chroma.parentElement.dataset.open ? JSON.parse($chroma.parentElement.dataset.open) : void 0;
-          if (forceOpen ?? (this.config.code.maxShownLines < 0 || code.split('\n').length < this.config.code.maxShownLines + 2)) {
-            $chroma.classList.add('open');
+
+          // 2. switch active tab UI
+          $items.querySelectorAll('.tab-item').forEach(b => b.classList.remove('active'));
+          $btn.classList.add('active');
+          if ($tab.dataset.codeToggle === 'true') {
+            window.localStorage.setItem('config_lang_perf', $tab.dataset.tabTitle.toLowerCase());
+            const activeItems = document.querySelectorAll(`
+              .tab-item[title="${$tab.dataset.tabTitle.toLowerCase()}"]:not(.active),
+              .tab-item[title="${$tab.dataset.tabTitle.toUpperCase()}"]:not(.active)`
+            );
+            forEach(activeItems, t => t.click());
           }
-          $copy.title = this.config.code.copyTitle;
-          $copy.addEventListener('click', () => {
-            this.util.copyText(code).then(() => {
-              this.util.animateCSS($code, 'animate__flash');
-            }, () => {
-              console.error('Clipboard write failed!', 'Your browser does not support clipboard API!');
-            });
-          }, false);
-          $header.appendChild($copy);
-        }
-        $chroma.insertBefore($header, $chroma.firstChild);
+          
+          // 3. switch content
+          $tabs.forEach(b => b.classList.remove('active'));
+          $tab.classList.add('active');
+
+          // 4. sync shadow mode data attribute
+          const shadowMode = $tab?.dataset.shadow;
+          if (shadowMode) {
+            $container.dataset.shadow = shadowMode;
+          } else {
+            delete $container.dataset.shadow;
+          }
+
+          // 5. move new buttons to actions
+          const $codeHeader = $tab.querySelector('.code-header');
+          if ($codeHeader) {
+            $codeHeader.querySelectorAll('.action-btn').forEach(btn => $actions.appendChild(btn));
+          }
+        });
+        $items.appendChild($btn);
+        
+        // move block to content
+        $tab.classList.toggle('active', resolvedIndex === index || defaultActiveTab);
+        $tab.classList.remove('is-collapsed');
+        $tab.classList.remove('d-none');
+        $tab.dataset.tabInit = 'true';
+        $content.appendChild($tab);
+      });
+      
+      $container.appendChild($header);
+      $container.appendChild($content);
+
+      // initialize actions for the active tab
+      if (resolvedIndex !== -1) {
+        const $activeBtn = $items.querySelector(`.tab-item[data-index="${resolvedIndex}"]`);
+        if ($activeBtn) $activeBtn.click();
+      } else {
+        $items.firstElementChild.click();
       }
     });
   }
@@ -523,15 +755,15 @@ class FixIt {
    * init diagram copy button
    */
   initDiagramCopyBtn() {
-    const stagingDOM = this.util.getStagingDOM()
-    this.util.forEach(document.querySelectorAll('.diagram-copy-btn'), ($btn) => {
+    const stagingDOM = getStagingDOM()
+    forEach(document.querySelectorAll('.diagram-copy-btn'), ($btn) => {
       $btn.addEventListener('click', () => {
         stagingDOM.stage($btn.parentElement.querySelector('template').content.cloneNode(true))
         let code = stagingDOM.contentAsText();
         try {
           code = JSON.stringify(JSON.parse(code), null, 2);
-        } catch {}
-        this.util.copyText(code).then(() => {
+        } catch { }
+        copyText(code).then(() => {
           $btn.toggleAttribute('data-copied', true);
           setTimeout(() => {
             $btn.toggleAttribute('data-copied', false);
@@ -544,22 +776,44 @@ class FixIt {
     stagingDOM.destroy();
   }
 
-  initTable(target = document) {
-    this.util.forEach(target.querySelectorAll('.content table'), ($table) => {
-      const $wrapper = document.createElement('div');
-      $wrapper.className = 'table-wrapper';
-      $table.parentElement.replaceChild($wrapper, $table);
-      $wrapper.appendChild($table);
-    });
-  }
-
   /**
-   * init simple copy code when there is no code header
-   * https://github.com/github/clipboard-copy-element
-   * @param {ELement} singleCode single code block
+   * Helper method to update TOC active state based on scroll position
+   * @param {HTMLElement} $tocContainer - TOC container element for parent traversal
+   * @param {HTMLCollection} $headingElements - Heading elements to track
+   * @param {number} indexOffset - Offset for active state calculation
    */
-  initCopyCode(singleCode) {
-    // TODO
+  _updateTocActiveState($tocContainer, $headingElements, indexOffset) {
+    const $tocLinkElements = $tocContainer.querySelectorAll('a:first-child');
+    const $tocLiElements = $tocContainer.getElementsByTagName('li');
+
+    // Remove all active classes
+    forEach($tocLinkElements, ($tocLink) => {
+      $tocLink.classList.remove('active');
+    });
+    forEach($tocLiElements, ($tocLi) => {
+      $tocLi.classList.remove('has-active');
+    });
+
+    // Calculate active TOC index
+    let activeTocIndex = $headingElements.length - 1;
+    for (let i = 0; i < $headingElements.length - 1; i++) {
+      const thisTop = $headingElements[i].getBoundingClientRect().top;
+      const nextTop = $headingElements[i + 1].getBoundingClientRect().top;
+      if ((i == 0 && thisTop > indexOffset) || (thisTop <= indexOffset && nextTop > indexOffset)) {
+        activeTocIndex = i;
+        break;
+      }
+    }
+
+    // Add active classes
+    if (activeTocIndex !== -1 && $tocLinkElements[activeTocIndex]) {
+      $tocLinkElements[activeTocIndex].classList.add('active');
+      let $parent = $tocLinkElements[activeTocIndex].parentElement;
+      while ($parent !== $tocContainer) {
+        $parent.classList.add('has-active');
+        $parent = $parent.parentElement.parentElement;
+      }
+    }
   }
 
   /**
@@ -567,66 +821,61 @@ class FixIt {
    */
   initToc() {
     const $tocCore = document.getElementById('TableOfContents');
-    if ($tocCore === null) {
-      return;
+    if ($tocCore === null) return;
+    const $headingElements = document.getElementsByClassName('heading-element');
+    const INDEX_OFFSET = 20 + this.breadcrumbHeight + (
+      document.body.dataset.headerDesktop !== 'normal' ? document.getElementById('header-desktop').offsetHeight : 0
+    );
+    // TOC Drawer Button Visibility
+    const openButton = document.querySelector("#toc-drawer-button");
+    if (openButton) {
+      openButton.classList.toggle('d-none', !isTocStatic());
     }
-    if (document.getElementById('toc-static').dataset.kept === 'true' || this.util.isTocStatic()) {
+    // TOC Static and TOC Dialog
+    if (isTocStatic()) {
       const $tocContentStatic = document.getElementById('toc-content-static');
       if ($tocCore.parentElement !== $tocContentStatic) {
         $tocCore.parentElement.removeChild($tocCore);
         $tocContentStatic.appendChild($tocCore);
       }
+      this._tocDialogOnScroll = this._tocDialogOnScroll || (() => {
+        this._updateTocActiveState(
+          document.querySelector('#toc-content-drawer>nav'),
+          $headingElements,
+          INDEX_OFFSET
+        );
+      });
+      this._tocDialogOnScroll();
+      this.scrollEventSet.add(this._tocDialogOnScroll);
       this._tocOnScroll && this.scrollEventSet.delete(this._tocOnScroll);
-    } else {
-      const $tocContentAuto = document.getElementById('toc-content-auto');
-      if ($tocCore.parentElement !== $tocContentAuto) {
-        $tocCore.parentElement.removeChild($tocCore);
-        $tocContentAuto.appendChild($tocCore);
-      }
-      const $toc = document.getElementById('toc-auto');
-      $toc.style.visibility = 'visible';
-      this.util.animateCSS($toc, ['animate__fadeIn', 'animate__faster'], true);
-      const $postMeta = document.querySelector('.post-meta');
-      $toc.style.marginTop = `${$postMeta.offsetTop + $postMeta.clientHeight}px`;
-      const $tocLinkElements = $tocCore.querySelectorAll('a:first-child');
-      const $tocLiElements = $tocCore.getElementsByTagName('li');
-      const $headingElements = document.getElementsByClassName('heading-element');
-      const headerHeight = document.getElementById('header-desktop').offsetHeight;
-      document.querySelector('.fi-container').addEventListener('resize', () => {
-        $toc.style.marginBottom = `${document.querySelector('.fi-container').clientHeight - document.querySelector('.post-footer').offsetTop}px`;
-      });
-      this._tocOnScroll = this._tocOnScroll || (() => {
-        $toc.style.marginBottom = `${document.querySelector('.fi-container').clientHeight - document.querySelector('.post-footer').offsetTop}px`;
-        this.util.forEach($tocLinkElements, ($tocLink) => {
-          $tocLink.classList.remove('active');
-        });
-        this.util.forEach($tocLiElements, ($tocLi) => {
-          $tocLi.classList.remove('has-active');
-        });
-        const INDEX_SPACING = 20 + (document.body.dataset.headerDesktop !== 'normal' ? headerHeight : 0) + this.breadcrumbHeight;
-        let activeTocIndex = $headingElements.length - 1;
-        for (let i = 0; i < $headingElements.length - 1; i++) {
-          const thisTop = $headingElements[i].getBoundingClientRect().top;
-          const nextTop = $headingElements[i + 1].getBoundingClientRect().top;
-          if ((i == 0 && thisTop > INDEX_SPACING) || (thisTop <= INDEX_SPACING && nextTop > INDEX_SPACING)) {
-            activeTocIndex = i;
-            break;
-          }
-        }
-        if (activeTocIndex !== -1 && $tocLinkElements[activeTocIndex]) {
-          $tocLinkElements[activeTocIndex].classList.add('active');
-          let $parent = $tocLinkElements[activeTocIndex].parentElement;
-          while ($parent !== $tocCore) {
-            $parent.classList.add('has-active');
-            $parent = $parent.parentElement.parentElement;
-          }
-        }
-      });
-      this._tocOnScroll();
-      this.scrollEventSet.add(this._tocOnScroll);
+      return;
     }
+
+    // TOC Auto
+    const $tocContentAuto = document.getElementById('toc-content-auto');
+    if ($tocCore.parentElement !== $tocContentAuto) {
+      $tocCore.parentElement.removeChild($tocCore);
+      $tocContentAuto.appendChild($tocCore);
+    }
+    const $toc = document.getElementById('toc-auto');
+    $toc.style.visibility = 'visible';
+    animateCSS($toc, ['animate__fadeIn', 'animate__faster'], true);
+    const $postMeta = document.querySelector('.post-meta');
+    $toc.style.marginTop = `${$postMeta.offsetTop + $postMeta.clientHeight}px`;
+
+    document.querySelector('.fi-container').addEventListener('resize', () => {
+      $toc.style.marginBottom = `${document.querySelector('.fi-container').clientHeight - document.querySelector('.post-footer').offsetTop}px`;
+    });
+    this._tocOnScroll = this._tocOnScroll || (() => {
+      $toc.style.marginBottom = `${document.querySelector('.fi-container').clientHeight - document.querySelector('.post-footer').offsetTop}px`;
+      this._updateTocActiveState($tocCore, $headingElements, INDEX_OFFSET);
+    });
+    this._tocOnScroll();
+    this.scrollEventSet.add(this._tocOnScroll);
+    this._tocDialogOnScroll && this.scrollEventSet.delete(this._tocDialogOnScroll);
   }
 
+  // TODO refactor use allow-discrete display property
   initTocListener() {
     const $toc = document.getElementById('toc-auto');
     const $tocContentAuto = document.getElementById('toc-content-auto');
@@ -634,10 +883,30 @@ class FixIt {
       const animation = ['animate__faster'];
       const tocHidden = $toc.classList.contains('toc-hidden');
       animation.push(tocHidden ? 'animate__fadeIn' : 'animate__fadeOut');
-      $tocContentAuto.classList.remove(tocHidden ? 'animate__fadeOut' : 'animate__fadeIn');
-      this.util.animateCSS($tocContentAuto, animation, true);
+      if (tocHidden) {
+        $tocContentAuto.classList.remove('d-none', 'animate__fadeOut');
+      } else {
+        $tocContentAuto.classList.remove('animate__fadeIn');
+      }
+      animateCSS($tocContentAuto, animation, true, () => {
+        $tocContentAuto.classList.contains('animate__fadeOut') && $tocContentAuto.classList.add('d-none');
+      });
       $toc.classList.toggle('toc-hidden');
     }, false);
+  }
+
+  initTocDialog() {
+    // HTMLDialogElement
+    const dialog = document.querySelector("#toc-dialog");
+    const openButton = document.querySelector("#toc-drawer-button");
+    if (!dialog || !openButton) return;
+    openButton.addEventListener("click", () => {
+      dialog.showModal();
+      document.activeElement?.blur();
+    });
+    dialog.addEventListener("click", (e) => {
+      dialog.close();
+    });
   }
 
   /**
@@ -654,7 +923,7 @@ class FixIt {
         $tocCore = $newTocCore;
       }
       // remove APlayer click event listener of the heading mark
-      this.util.forEach(document.querySelectorAll('.heading-mark'), ($headingMark) => {
+      forEach(document.querySelectorAll('.heading-mark'), ($headingMark) => {
         const $newHeadingMark = $headingMark.cloneNode(true);
         $headingMark.parentElement.replaceChild($newHeadingMark, $headingMark);
       });
@@ -662,9 +931,7 @@ class FixIt {
   }
 
   initEcharts() {
-    if (!this.config.echarts) {
-      return;
-    }
+    if (!this.config.echarts) return;
     echarts.registerTheme('light', this.config.echarts.lightTheme);
     echarts.registerTheme('dark', this.config.echarts.darkTheme);
     this._echartsOnSwitchTheme = this._echartsOnSwitchTheme || (() => {
@@ -673,12 +940,10 @@ class FixIt {
         this._echartsArr[i].dispose();
       }
       this._echartsArr = [];
-      const stagingDOM = this.util.getStagingDOM()
-      this.util.forEach(document.getElementsByClassName('echarts'), ($echarts) => {
+      const stagingDOM = getStagingDOM()
+      forEach(document.getElementsByClassName('echarts'), ($echarts) => {
         const $dataEl = $echarts.nextElementSibling;
-        if ($dataEl.tagName !== 'TEMPLATE') {
-          return;
-        }
+        if ($dataEl.tagName !== 'TEMPLATE') return;
         const chart = echarts.init($echarts, this.isDark ? 'dark' : 'light', { renderer: 'svg' });
         chart.showLoading();
         stagingDOM.stage($dataEl.content.cloneNode(true));
@@ -708,7 +973,7 @@ class FixIt {
              * @returns {Object|Promise} ECharts option or Promise
              */
             const _getOption = new Function('fixit', 'chart',
-              this.util.isObjectLiteral(jsCodes) ? `return ${jsCodes}` : jsCodes
+              isObjectLiteral(jsCodes) ? `return ${jsCodes}` : jsCodes
             );
             if ($dataEl.dataset.async === 'true') {
               return Promise.resolve(_getOption(this, chart)).then(option => {
@@ -742,7 +1007,7 @@ class FixIt {
         mapboxgl.setRTLTextPlugin(this.config.mapbox.RTLTextPlugin);
         this._mapboxArr = this._mapboxArr || [];
       }
-      this.util.forEach(document.querySelectorAll('.mapbox:empty'), ($mapbox) => {
+      forEach(document.querySelectorAll('.mapbox:empty'), ($mapbox) => {
         const { lng, lat, zoom, lightStyle, darkStyle, marked, markers, navigation, geolocate, scale, fullscreen } = JSON.parse($mapbox.dataset.options);
         const mapbox = new mapboxgl.Map({
           container: $mapbox,
@@ -759,7 +1024,7 @@ class FixIt {
         if (Array.isArray(markerArray) && markerArray.length > 0) {
           markerArray.forEach(marker => {
             const { lng: markerLng, lat: markerLat, description } = marker;
-            const popup = new mapboxgl.Popup({ offset: 25 }).setText(description); 
+            const popup = new mapboxgl.Popup({ offset: 25 }).setText(description);
             new mapboxgl.Marker()
               .setLngLat([markerLng, markerLat])
               .setPopup(popup)
@@ -791,7 +1056,7 @@ class FixIt {
         this._mapboxArr.push(mapbox);
       });
       this._mapboxOnSwitchTheme = this._mapboxOnSwitchTheme || (() => {
-        this.util.forEach(this._mapboxArr, (mapbox) => {
+        forEach(this._mapboxArr, (mapbox) => {
           const $mapbox = mapbox.getContainer();
           const { lightStyle, darkStyle } = JSON.parse($mapbox.dataset.options);
           mapbox.setStyle(this.isDark ? darkStyle : lightStyle);
@@ -818,7 +1083,7 @@ class FixIt {
         acc[group].push(ele);
         return acc;
       }, {});
-      const stagingDOM = this.util.getStagingDOM()
+      const stagingDOM = getStagingDOM()
 
       Object.values(groupMap).forEach((group) => {
         const typeone = (i) => {
@@ -885,16 +1150,14 @@ class FixIt {
   }
 
   initComment() {
-    if (!this.config.comment?.enable) {
-      return;
-    }
+    if (!this.config.comment?.enable) return;
     // whether to show the view comments button
     if (document.querySelector('#comments')) {
       const $viewCommentsBtn = document.querySelector('.view-comments');
       $viewCommentsBtn.classList.remove('d-none');
       // view comments button click event
       $viewCommentsBtn.addEventListener('click', () => {
-        this.util.scrollIntoView('#comments');
+        scrollIntoView('#comments');
       }, false);
     }
     this.config.comment.expired && document.querySelector('#comments').remove();
@@ -984,7 +1247,7 @@ class FixIt {
     if (this.config.comment.giscus) {
       const giscusConfig = this.config.comment.giscus;
       this._giscusOnSwitchTheme = this._giscusOnSwitchTheme || (() => {
-        const message = { setConfig: { theme: this.isDark ? giscusConfig.darkTheme : giscusConfig.lightTheme }};
+        const message = { setConfig: { theme: this.isDark ? giscusConfig.darkTheme : giscusConfig.lightTheme } };
         document.querySelector('.giscus-frame')?.contentWindow.postMessage({ giscus: message }, giscusConfig.origin);
       });
       this.switchThemeEventSet.add(this._giscusOnSwitchTheme);
@@ -992,7 +1255,7 @@ class FixIt {
       this._messageListener = (event) => {
         if (event.origin !== giscusConfig.origin) return;
         const $script = document.querySelector('#giscus>script');
-        if ($script){
+        if ($script) {
           $script.parentElement.removeChild($script);
         }
         this._giscusOnSwitchTheme()
@@ -1011,7 +1274,7 @@ class FixIt {
     let now = new Date();
     let run = new Date(this.config.siteTime);
     let $runTimes = document.querySelector('.run-times');
-    if (!this.util.isValidDate(run) || !$runTimes) {
+    if (!isValidDate(run) || !$runTimes) {
       clearInterval(this.siteTime);
       $runTimes && $runTimes.parentNode.remove();
       return;
@@ -1050,22 +1313,18 @@ class FixIt {
       navigator.serviceWorker
         .ready
         .then(function (registration) {
-        // console.log('Service Worker Ready');
-      });
+          // console.log('Service Worker Ready');
+        });
     }
   }
 
   initWatermark() {
-    if (!this.config.watermark?.enable) {
-      return;
-    }
+    if (!this.config.watermark?.enable) return;
     new Watermark(this.config.watermark);
   }
 
   initPangu() {
-    if (!this.config.pangu?.enable) {
-      return;
-    }
+    if (!this.config.pangu?.enable) return;
     const selector = this.config.pangu.selector;
     if (selector) {
       // to avoid extra spaces for extended Markdown syntax fraction in Chinese
@@ -1083,15 +1342,17 @@ class FixIt {
   }
 
   initMathJax() {
-    window.MathJax?.typeset && window.MathJax.typeset();
+    if (window.MathJax?.typesetPromise) {
+      window.MathJax.typesetPromise().then(() => {
+        // Do something else after typesetting is complete
+      }).catch((err) => console.log(err.message));
+    }
   }
 
   initJsonViewer() {
-    if (!window.JsonViewerElement) {
-      return;
-    }
+    if (!window.JsonViewerElement) return;
     this._jsonViewerOnSwitchTheme = this._jsonViewerOnSwitchTheme || (() => {
-      this.util.forEach(document.getElementsByTagName('json-viewer'), ($el) => {
+      forEach(document.getElementsByTagName('json-viewer'), ($el) => {
         $el.setAttribute('theme', this.isDark ? 'dark' : 'light');
       });
     });
@@ -1099,69 +1360,125 @@ class FixIt {
     this._jsonViewerOnSwitchTheme();
   }
 
-  initFixItDecryptor() {
-    this.decryptor = new FixItDecryptor({
-      decrypted: () => {
-        this.initTwemoji();
-        this.initDetails();
-        this.initLightGallery();
-        this.initCodeWrapper();
-        this.initDiagramCopyBtn();
-        this.initTable();
-        this.initEcharts();
-        this.initTypeit();
-        this.initMapbox();
+  initTabEvents(target = document) {
+    target.addEventListener('tab-container-changed', () => {
+      FileTree.updateLineHeight(target);
+      window.FixItMermaid?.init?.();
+    }, false);
+  }
+
+  initFootnotes() {
+    const $footnoteRefs = document.querySelectorAll('#content sup[id^="fnref:"]');
+    const $footnotes = document.querySelector('.footnotes[role="doc-endnotes"]');
+    if (!$footnoteRefs.length || !$footnotes) return;
+    const footnoteMap = new Map();
+    $footnoteRefs.forEach(($ref) => {
+      if (this.config.tooltip) {
+        const $link = $ref.querySelector('a.footnote-ref');
+        if ($link) {
+          $link.addEventListener('click', (e) => {
+            e.preventDefault();
+          }, false);
+        }
+      }
+      const id = $ref.id.replace('fnref:', '');
+      const $footnoteContent = $footnotes.querySelector(`[id="fn:${id}"]`);
+      if ($footnoteContent) {
+        const $clonedContent = $footnoteContent.cloneNode(true);
+        const $backref = $clonedContent.querySelector('.footnote-backref');
+        if ($backref) {
+          $backref.remove();
+        }
+        footnoteMap.set($ref, $clonedContent);
+      }
+    });
+    footnoteMap.forEach(($content, $ref) => {
+      if ($ref.hasAttribute('title')) return;
+      $ref.setAttribute('title', $content.textContent.trim());
+      if (this.config.tooltip) {
+        window.CellTooltip.getOrCreateInstance($ref);
+      }
+    });
+  }
+
+  initTooltip() {
+    if (!this.config.tooltip) return;
+    window.CellTooltip.initAll('[data-ct-tooltip]');
+  }
+
+  /**
+   * Helper method to initialize content components
+   * @param {Element} target - The target element (optional, defaults to document)
+   * @param {Boolean} includeToc - Whether to initialize TOC-related components
+   */
+  _initContentComponents(target = document, includeToc = false) {
+    this.initTwemoji(target);
+    this.initDetails(target);
+    this.initLightGallery();
+    this.initCodeWrapper();
+    this.initCodeTabs();
+    this.initDiagramCopyBtn();
+    this.initEcharts();
+    this.initTypeit(target);
+    this.initMapbox();
+    this.initFootnotes();
+    this.initTooltip();
+    if (includeToc) {
+       window.setTimeout(() => {
         this.fixTocScroll();
         this.initToc();
         this.initTocListener();
-        this.initPangu();
-        this.initMathJax();
-        this.initJsonViewer();
-        window.FixItMermaid?.init?.();
-        window.FixItAPlayer?.init?.();
-        this.util.forEach(document.querySelectorAll('.encrypted-hidden'), ($element) => {
-          $element.classList.replace('encrypted-hidden', 'decrypted-shown');
-        });
+        this.initTocDialog();
+      }, 100);
+    }
+    this.initPangu();
+    this.initMathJax();
+    this.initJsonViewer();
+    this.initTabEvents(target);
+    FileTree.init(target);
+    window.FixItMermaid?.init?.();
+    window.FixItAPlayer?.init?.();
+  }
+
+  /**
+   * Helper method to toggle encrypted content visibility
+   * @param {Element} container - The container element
+   * @param {Boolean} show - true to show decrypted content, false to hide
+   */
+  _toggleEncryptedClass(container, show) {
+    const fromClass = show ? 'encrypted-hidden' : 'decrypted-shown';
+    const toClass = show ? 'decrypted-shown' : 'encrypted-hidden';
+    forEach(container.querySelectorAll(`.${fromClass}`), ($element) => {
+      $element.classList.replace(fromClass, toClass);
+    });
+  }
+
+  initFixItDecryptor() {
+    this.decryptor = new FixItDecryptor({
+      decrypted: () => {
+        this._initContentComponents(document, true);
+        this._toggleEncryptedClass(document, true);
       },
       partialDecrypted: ($content) => {
-        this.initTwemoji($content);
-        this.initDetails($content);
-        this.initLightGallery();
-        this.initCodeWrapper();
-        this.initDiagramCopyBtn();
-        this.initTable($content);
-        this.initEcharts();
-        this.initTypeit($content);
-        this.initMapbox();
-        this.initPangu();
-        this.initMathJax();
-        this.initJsonViewer();
-        window.FixItMermaid?.init?.();
-        window.FixItAPlayer?.init?.();
-        this.util.forEach($content.querySelectorAll('.encrypted-hidden'), ($element) => {
-          $element.classList.replace('encrypted-hidden', 'decrypted-shown');
-        });
+        this._initContentComponents($content, false);
+        this._toggleEncryptedClass($content, true);
       },
       reset: () => {
-        this.util.forEach(document.querySelectorAll('.decrypted-shown'), ($element) => {
-          $element.classList.replace('decrypted-shown', 'encrypted-hidden');
-        });
+        this._toggleEncryptedClass(document, false);
       }
     });
     this.decryptor.init(this.config.encryption);
   }
 
   initAutoMark() {
-    if (!this.config.autoBookmark) {
-      return;
-    }
+    if (!this.config.autoBookmark) return;
     window.addEventListener('beforeunload', () => {
-      window.sessionStorage?.setItem(`fixit-bookmark/#${location.pathname}`, this.util.getScrollTop());
+      window.sessionStorage?.setItem(`fixit-bookmark/#${location.pathname}`, getScrollTop());
     });
     const scrollTop = Number(window.sessionStorage?.getItem(`fixit-bookmark/#${location.pathname}`));
     // If the page opens with a specific hash, just jump out
     if (scrollTop && location.hash === '') {
-      window.scrollTo({ 
+      window.scrollTo({
         top: scrollTop,
         behavior: 'smooth'
       });
@@ -1170,19 +1487,17 @@ class FixIt {
 
   initReward() {
     const $rewards = document.querySelectorAll('.post-reward [data-mode="fixed"]');
-    if (!$rewards.length) {
-      return;
-    }
+    if (!$rewards.length) return;
     // `fixed` mode only supports desktop
-    if (this.util.isMobile()) {
-      this.util.forEach($rewards, ($reward) => {
+    if (isMobile()) {
+      forEach($rewards, ($reward) => {
         $reward.removeAttribute('data-mode');
       });
       return;
     }
     // Close post reward images exclude special id
     const _closeRewardExclude = (id) => {
-      this.util.forEach($rewards, ($reward) => {
+      forEach($rewards, ($reward) => {
         const $rewardInput = $reward.parentElement.querySelector('.reward-input');
         if ($rewardInput.id !== id) {
           $rewardInput.checked = false;
@@ -1190,7 +1505,7 @@ class FixIt {
       });
     };
     // Add additional click event to reward buttons
-    this.util.forEach($rewards, ($reward) => {
+    forEach($rewards, ($reward) => {
       $reward.previousElementSibling.addEventListener('click', function () {
         _closeRewardExclude(this.getAttribute('for'));
       }, false)
@@ -1199,16 +1514,14 @@ class FixIt {
   }
 
   initPostChatUser() {
-    if (!window.postChatUser || !postChatConfig || postChatConfig.userMode === 'magic') {
-      return;
-    }
+    if (!window.postChatUser || !postChatConfig || postChatConfig.userMode === 'magic') return;
     postChat_theme = this.isDark ? 'dark' : 'light';
     this.switchThemeEventSet.add((isDark) => {
       const targetFrame = document.getElementById("postChat_iframeContainer")
       if (targetFrame) {
         window.postChatUser.setPostChatTheme(isDark ? 'dark' : 'light');
       } else {
-        postChat_theme  = isDark ? 'dark' : 'light';
+        postChat_theme = isDark ? 'dark' : 'light';
       }
     });
   }
@@ -1216,7 +1529,6 @@ class FixIt {
   onScroll() {
     const $headers = [];
     const ACCURACY = 20;
-    const $fixedButtons = document.querySelector('.fixed-buttons');
     const $backToTop = document.querySelector('.back-to-top');
     const $readingProgressBar = document.querySelector('.reading-progress-bar');
     if (document.body.dataset.headerDesktop === 'auto') {
@@ -1225,9 +1537,8 @@ class FixIt {
     if (document.body.dataset.headerMobile === 'auto') {
       $headers.push(document.getElementById('header-mobile'));
     }
-    // b2t button click event
     $backToTop?.addEventListener('click', () => {
-      this.util.scrollIntoView('body');
+      scrollIntoView('body');
     });
     window.addEventListener('scroll', (event) => {
       if (this.disableScrollEvent) {
@@ -1235,38 +1546,42 @@ class FixIt {
         return;
       }
       const $mask = document.getElementById('mask');
-      this.newScrollTop = this.util.getScrollTop();
+      this.newScrollTop = getScrollTop();
       const scroll = this.newScrollTop - this.oldScrollTop;
       // header animation
-      this.util.forEach($headers, ($header) => {
+      forEach($headers, ($header) => {
         if (scroll > ACCURACY) {
           $header.classList.remove('animate__fadeInDown');
-          this.util.animateCSS($header, ['animate__fadeOutUp'], true);
+          animateCSS($header, ['animate__fadeOutUp'], true);
           $mask.click();
         } else if (scroll < -ACCURACY) {
           $header.classList.remove('animate__fadeOutUp');
-          this.util.animateCSS($header, ['animate__fadeInDown'], true);
+          animateCSS($header, ['animate__fadeInDown'], true);
           $mask.click();
         }
       });
       const contentHeight = document.body.scrollHeight - window.innerHeight;
       const scrollPercent = Math.max(Math.min(100 * Math.max(this.newScrollTop, 0) / contentHeight, 100), 0);
       if ($readingProgressBar) {
-        $readingProgressBar.style.setProperty('--progress', `${scrollPercent.toFixed(2)}%`);
+        $readingProgressBar.style.setProperty('--fi-progress', `${scrollPercent.toFixed(2)}%`);
       }
-      // whether to show fixed buttons
-      if ($fixedButtons) {
+      // whether to show back to top button
+      if ($backToTop) {
         if (scrollPercent > 1) {
-          $fixedButtons.classList.remove('d-none', 'animate__fadeOut');
-          this.util.animateCSS($fixedButtons, ['animate__fadeIn'], true);
+          $backToTop.classList.remove('d-none', 'animate__fadeOut');
+          animateCSS($backToTop, ['animate__fadeIn'], true);
         } else {
-          $fixedButtons.classList.remove('animate__fadeIn');
-          this.util.animateCSS($fixedButtons, ['animate__fadeOut'], true, () => {
-            $fixedButtons.classList.contains('animate__fadeOut') && $fixedButtons.classList.add('d-none');
+          $backToTop.classList.remove('animate__fadeIn');
+          animateCSS($backToTop, ['animate__fadeOut'], true, () => {
+            $backToTop.classList.contains('animate__fadeOut') && $backToTop.classList.add('d-none');
           });
         }
-        if ($backToTop) {
-          $backToTop.querySelector('span').innerText = `${Math.round(scrollPercent)}%`;
+        // Set progress as 0-100 value for CSS calculation
+        $backToTop.style.setProperty('--fi-b2t-progress', scrollPercent.toFixed(2));
+        // Calculate stroke-dashoffset for Firefox compatibility
+        if (navigator.userAgent.toLowerCase().indexOf('firefox') > -1) {
+          const dashoffset = 2 * Math.PI * 50 * (1 - scrollPercent / 100);
+          $backToTop.querySelector('circle.progress').style.strokeDashoffset = dashoffset.toFixed(2);
         }
       }
       for (let event of this.scrollEventSet) {
@@ -1277,7 +1592,7 @@ class FixIt {
   }
 
   onResize() {
-    let resizeBefore = this.util.isMobile();
+    let resizeBefore = isMobile();
     window.addEventListener('resize', () => {
       if (!this._resizeTimeout) {
         this._resizeTimeout = window.setTimeout(() => {
@@ -1288,10 +1603,10 @@ class FixIt {
           this.initToc();
           this.initSearch();
 
-          const isMobile = this.util.isMobile()
-          if (isMobile !== resizeBefore) {
+          const _isMobile = isMobile();
+          if (_isMobile !== resizeBefore) {
             document.getElementById('mask').click();
-            resizeBefore = isMobile;
+            resizeBefore = _isMobile;
           }
         }, 100);
       }
@@ -1300,9 +1615,7 @@ class FixIt {
 
   onClickMask() {
     document.getElementById('mask').addEventListener('click', () => {
-      if (!document.body.classList.contains('blur')) {
-        return;
-      }
+      if (!document.body.classList.contains('blur')) return;
       for (let event of this.clickMaskEventSet) {
         event();
       }
@@ -1311,12 +1624,58 @@ class FixIt {
     }, false);
   }
 
-  beforeprint() {
+  initPrint() {
     window.addEventListener('beforeprint', () => {
-      this.util.forEach(document.querySelectorAll('.chroma'), ($el) => {
-        $el.classList.toggle('open', true)
-      });
+      const $content = document.getElementById('content');
+      const printConfig = this.config.print || {};
+
+      if (printConfig.expandAdmonition) {
+        forEach($content.querySelectorAll('.admonition'), ($el) => $el.classList.add('open'));
+      }
+      if (printConfig.expandCode) {
+        // revert code tabs to code blocks for better printing support
+        forEach($content.querySelectorAll('.code-tabs'), ($codeTabs) => {
+          // restore action buttons to the active tab's code-header before reverting
+          const $actions = $codeTabs.querySelector('.tabs-actions');
+          const $activeBlock = $codeTabs.querySelector('.code-block.active');
+          if ($actions && $activeBlock) {
+            const $codeHeader = $activeBlock.querySelector('.code-header');
+            if ($codeHeader) {
+              Array.from($actions.children).forEach(btn => $codeHeader.appendChild(btn));
+            }
+          }
+          const $codeBlocks = $codeTabs.querySelectorAll('.code-block');
+          $codeBlocks.forEach(($codeBlock) => {
+            delete $codeBlock.dataset.tabInit;
+            $codeTabs.parentElement.insertBefore($codeBlock, $codeTabs);
+          });
+          $codeTabs.parentElement.removeChild($codeTabs);
+        });
+        forEach($content.querySelectorAll('.code-block'), ($el) => {
+          // line wrapping
+          $el.classList.add('line-wrapping');
+          // expand all code blocks
+          $el.classList.remove('is-collapsed');
+          // expand code preview
+          if ($el.querySelector('.code-expand-btn')) {
+            $el.classList.add('is-expanded');
+          }
+        });
+      }
+      if (printConfig.expandDetails) {
+        forEach($content.querySelectorAll('details'), ($el) => $el.setAttribute('open', ''));
+      }
       for (let event of this.beforeprintEventSet) {
+        event();
+      }
+      if (printConfig.expandFileTree) {
+        FileTree.expandAll($content);
+      }
+    }, false);
+
+    window.addEventListener('afterprint', () => {
+      this.initCodeTabs();
+      for (let event of this.afterprintEventSet) {
         event();
       }
     }, false);
@@ -1328,17 +1687,7 @@ class FixIt {
         this.initFixItDecryptor();
       }
       if (!this.config.encryption?.all) {
-        this.initTwemoji();
-        this.initDetails();
-        this.initLightGallery();
-        this.initCodeWrapper();
-        this.initDiagramCopyBtn();
-        this.initTable();
-        this.initEcharts();
-        this.initTypeit();
-        this.initMapbox();
-        this.initPangu();
-        this.initJsonViewer();
+        this._initContentComponents(document, false);
       }
       this.initThemeColor();
       this.initSVGIcon();
@@ -1360,11 +1709,12 @@ class FixIt {
           this.fixTocScroll();
           this.initToc();
           this.initTocListener();
+          this.initTocDialog();
         }
         this.onScroll();
         this.onResize();
         this.onClickMask();
-        this.beforeprint();
+        this.initPrint();
       }, 100);
     } catch (err) {
       console.error(err);

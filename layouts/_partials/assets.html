@@ -19,7 +19,12 @@ FixIt theme assets partial
 {{- $config := (.Store.Get "this").config -}}
 {{- $config = dict "version" (hugo.Store.Get "version") | merge $config -}}
 {{- $author := partial "function/get-author-map.html" .Params.author -}}
-{{- $noBaseRelPermalink := strings.TrimPrefix (relURL "") $.RelPermalink -}}
+{{- $isArchivesOrOffline := (eq .Kind "home") | and (in .RelPermalink "archives") | or (in .RelPermalink "offline")  -}}
+{{- $uniqueFileId := "" -}}
+{{- $languagePrefix := .Site.LanguagePrefix -}}
+{{- with .File -}}
+  {{- $uniqueFileId = .UniqueID -}}
+{{- end -}}
 
 {{- /* Search */ -}}
 {{- if .Site.Params.search | and .Site.Params.search.enable -}}
@@ -61,7 +66,7 @@ FixIt theme assets partial
 {{- end -}}
 
 {{- /* JSON Viewer */ -}}
-{{- if .Store.Get "hasJsonViewer" -}}
+{{- if .Store.Get "hasJsonViewer" | and (not $isArchivesOrOffline) -}}
   {{- $source := $cdn.jsonViewerElementJS | default "lib/json-viewer-element/json-viewer-element.umd.js" -}}
   {{- dict "Source" $source "Fingerprint" $fingerprint "Defer" true | dict "Page" . "Data" | partial "store/script.html" -}}
 {{- end -}}
@@ -86,20 +91,8 @@ FixIt theme assets partial
   {{- $config = dict "lightgallery" true | merge $config -}}
 {{- end -}}
 
-{{- /* Code wrapper */ -}}
-{{- $code := $params.code | default dict -}}
-{{- if $code.enable -}}
-  {{- $config = $code.maxShownLines | dict "maxShownLines" | dict "code" | merge $config -}}
-  {{- if ne $code.edit false -}}
-    {{- $config = dict "editable" true "editLockTitle" (T "assets.editLockTitle") "editUnLockTitle" (T "assets.editUnLockTitle") | dict "code" | merge $config -}}
-  {{- end -}}
-  {{- if ne $code.copy false -}}
-    {{- $config = T "assets.copyToClipboard" | dict "copyTitle" | dict "code" | merge $config -}}
-  {{- end -}}
-{{- end -}}
-
 {{- /* Sharer.js */ -}}
-{{- if $params.share.enable -}}
+{{- if .Store.Get "hasSharer" -}}
   {{- $source := $cdn.sharerJS | default "lib/sharer/sharer.min.js" -}}
   {{- dict "Source" $source "Fingerprint" $fingerprint "Async" true "Defer" true | dict "Page" . "Data" | partial "store/script.html" -}}
 {{- end -}}
@@ -114,7 +107,7 @@ FixIt theme assets partial
 
 {{- /* KaTeX */ -}}
 {{- $math := .Store.Get "math" -}}
-{{- if .Store.Get "hasKaTeX" -}}
+{{- if .Store.Get "hasKaTeX" | and (not $isArchivesOrOffline) -}}
   {{- $source := $cdn.katexCSS | default "lib/katex/katex.min.css" -}}
   {{- dict "Source" $source "Fingerprint" $fingerprint "Preload" true | dict "Page" . "Data" | partial "store/style.html" -}}
   {{- /* Copy-tex extension */ -}}
@@ -125,7 +118,7 @@ FixIt theme assets partial
 {{- end -}}
 
 {{- /* MathJax */ -}}
-{{- if .Store.Get "hasMathJax" -}}
+{{- if .Store.Get "hasMathJax" | and (not $isArchivesOrOffline) -}}
   {{- $mathjax := $math.mathjax -}}
   {{- $mjoc := $mathjax.options | default dict -}}
   {{- $mjo := dict -}}
@@ -154,7 +147,7 @@ FixIt theme assets partial
 {{- end -}}
 
 {{- /* ECharts */ -}}
-{{- if .Store.Get "hasEcharts" -}}
+{{- if .Store.Get "hasEcharts" | and (not $isArchivesOrOffline) -}}
   {{- $source := $cdn.echartsJS | default "lib/echarts/echarts.min.js" -}}
   {{- dict "Source" $source "Fingerprint" $fingerprint "Defer" true | dict "Page" . "Data" | partial "store/script.html" -}}
   {{- $lightTheme := resources.Get "lib/echarts/theme/light.yml" | transform.Unmarshal -}}
@@ -163,7 +156,7 @@ FixIt theme assets partial
 {{- end -}}
 
 {{- /* Mapbox GL */ -}}
-{{- if .HasShortcode "mapbox" -}}
+{{- if .Store.Get "hasMapbox" -}}
   {{- $source := $cdn.mapboxGLCSS | default "lib/mapbox-gl/mapbox-gl.css" -}}
   {{- dict "Source" $source "Minify" true "Fingerprint" $fingerprint "Preload" true | dict "Page" . "Data" | partial "store/style.html" -}}
   {{- $source = $cdn.mapboxGLJS | default "lib/mapbox-gl/mapbox-gl.js" -}}
@@ -173,7 +166,7 @@ FixIt theme assets partial
 {{- end -}}
 
 {{- /* Music */ -}}
-{{- if (.HasShortcode "aplayer") | or (.HasShortcode "music") -}}
+{{- if (.Store.Get "hasAplayer") | or (.Store.Get "hasMusic") -}}
   {{- /* APlayer */ -}}
   {{- $source := $cdn.aplayerCSS | default "lib/aplayer/APlayer.min.css" -}}
   {{- dict "Source" $source "Fingerprint" $fingerprint "Preload" true | dict "Page" . "Data" | partial "store/style.html" -}}
@@ -182,14 +175,14 @@ FixIt theme assets partial
   {{- $source := $cdn.aplayerJS | default "lib/aplayer/APlayer.min.js" -}}
   {{- dict "Source" $source "Fingerprint" $fingerprint "Defer" true | dict "Page" . "Data" | partial "store/script.html" -}}
 
-  {{- if .HasShortcode "aplayer" -}}
+  {{- if .Store.Get "hasAplayer" -}}
     {{- $options := dict "targetPath" "js/lib/aplayer.min.js" "minify" hugo.IsProduction -}}
     {{- if not hugo.IsProduction -}}
       {{- $options = dict "sourceMap" "external" | merge $options -}}
     {{- end -}}
     {{- dict "Source" (resources.Get "js/lib/aplayer.js") "Build" $options "Fingerprint" $fingerprint "Defer" true | dict "Page" . "Data" | partial "store/script.html" -}}
   {{- end -}}
-  {{- if .HasShortcode "music" -}}
+  {{- if .Store.Get "hasMusic" -}}
     {{- /* MetingJS */ -}}
     {{- $source := $cdn.metingJS | default "lib/meting/Meting.min.js" -}}
     {{- dict "Source" $source "Fingerprint" $fingerprint "Defer" true | dict "Page" . "Data" | partial "store/script.html" -}}
@@ -197,7 +190,7 @@ FixIt theme assets partial
 {{- end -}}
 
 {{- /* Tabs and tab */ -}}
-{{- if .Store.Get "hasTabs" -}}
+{{- if .Store.Get "hasTabs" | and (not $isArchivesOrOffline) -}}
   {{- $source := $cdn.tabContainerElementJS | default "lib/tab-container-element/bundle.min.js" -}}
   {{- dict "Source" $source "Fingerprint" $fingerprint "Attr" `type="module"` "Defer" true | dict "Page" . "Data" | partial "store/script.html" -}}
 {{- end -}}
@@ -221,6 +214,14 @@ FixIt theme assets partial
   {{- $config = dict "pangu" .Site.Params.pangu | merge $config -}}
 {{- end -}}
 
+{{- /* Cell Tooltip */ -}}
+{{- if eq .Site.Params.tooltip true -}}
+  {{- /*  [todo] 临时可行性验证，需要寻找一个更稳定的替代品（Floating UI） */ -}}
+  {{- $source := $cdn.cellTooltipJS | default "lib/cell-tooltip/cell-tooltip.umd.js" -}}
+  {{- dict "Source" $source "Fingerprint" $fingerprint "Defer" true | dict "Page" . "Data" | partial "store/script.html" -}}
+  {{- $config = dict "tooltip" true | merge $config -}}
+{{- end -}}
+
 {{- /* Watermark */ -}}
 {{- if eq .Site.Params.watermark.enable true -}}
   {{- $source := $cdn.cellWatermarkJS | default "lib/cell-watermark/watermark.min.js" -}}
@@ -239,7 +240,7 @@ FixIt theme assets partial
 {{- end -}}
 
 {{- /* Content Decryption */ -}}
-{{- $encryptPartial := .HasShortcode "fixit-encryptor" -}}
+{{- $encryptPartial := .Store.Get "hasEncryptor" -}}
 {{- if $params.password | or $encryptPartial -}}
   {{- $cryptoCoreJS := $cdn.cryptoCoreJS | default "lib/crypto-js/core.js" -}}
   {{- $cryptoEncBase64JS := $cdn.cryptoEncBase64JS | default "lib/crypto-js/enc-base64.js" -}}
@@ -307,6 +308,9 @@ FixIt theme assets partial
   {{- end -}}
 {{- end -}}
 
+{{- /* Print */ -}}
+{{- $config = partial "function/snake2camel.html" .Site.Params.print | dict "print" | merge $config -}}
+
 {{- /* PostChat */ -}}
 {{- partial "plugin/post-chat-ai.html" . -}}
 
@@ -323,17 +327,17 @@ FixIt theme assets partial
 {{- if hugo.IsServer -}}
   {{- $configJS = add $configJS "console.log('Page config:', window.config);" -}}
 {{- end -}}
-{{- $targetPath := $noBaseRelPermalink | printf "%s/config/page.js" -}}
-{{- if (path.Ext .Page.RelPermalink) | or .IsHome -}}
-  {{- $targetPath = "" -}}
+{{- $targetPath := "" -}}
+{{- if $uniqueFileId | and (not .IsHome) -}}
+  {{- $targetPath = printf "%s/js/config/%s.js" $languagePrefix $uniqueFileId -}}
 {{- end -}}
 {{- dict "Content" $configJS "Path" $targetPath "Defer" true | dict "Page" . "Data" | partial "store/script.html" -}}
 
 {{- /* MathJax plugin */ -}}
-{{- if .Store.Get "hasMathJax" -}}
-  {{- $targetPath := $noBaseRelPermalink | printf "%s/mathjax.min.js" -}}
-  {{- if (path.Ext .Page.RelPermalink) | or .IsHome -}}
-    {{- $targetPath = "" -}}
+{{- if .Store.Get "hasMathJax" | and (not $isArchivesOrOffline) -}}
+  {{- $targetPath := "" -}}
+  {{- if $uniqueFileId | and (not .IsHome) -}}
+    {{- $targetPath = printf "%s/js/lib/mathjax/%s.min.js" $languagePrefix $uniqueFileId -}}
   {{- end -}}
   {{- $options := dict "targetPath" $targetPath "minify" hugo.IsProduction -}}
   {{- if not hugo.IsProduction -}}
@@ -343,7 +347,7 @@ FixIt theme assets partial
 {{- end -}}
 
 {{- /* Mermaid plugin */ -}}
-{{- if .Store.Get "hasMermaid" -}}
+{{- if .Store.Get "hasMermaid" | and (not $isArchivesOrOffline) -}}
   {{- $options := dict "Source" "js/lib/mermaid.js" "Template" "js/lib/mermaid.js" -}}
   {{- $options = dict "Context" . "Minify" hugo.IsProduction "Fingerprint" $fingerprint "Attr" `type="module"` | merge $options -}}
   {{- $options | dict "Page" $ "Data" | partial "store/script.html" -}}
@@ -370,14 +374,14 @@ FixIt theme assets partial
 
 {{- with .Store.Get "styleArr" -}}
   {{- $content := delimit . " " -}}
-  {{- $path := $noBaseRelPermalink | printf "%s/index.scss" -}}
-  {{- $options := printf "%s/index.min.css" $noBaseRelPermalink | dict "targetPath" -}}
+  {{- $path :=  printf "%s/css/page/%s.scss" $languagePrefix $uniqueFileId -}}
+  {{- $options := printf "css/page/%s.min.css" $uniqueFileId | dict "targetPath" -}}
   {{- dict "Content" $content "Path" $path "ToCSS" $options | dict "Page" $ "Data" | partial "store/style.html" -}}
 {{- end -}}
 
 {{- with .Store.Get "scriptArr" -}}
   {{- $content := delimit . "\n" -}}
-  {{- $targetPath := $noBaseRelPermalink | printf "%s/index.js" -}}
+  {{- $targetPath := printf "%s/js/page/%s.js" $languagePrefix $uniqueFileId -}}
   {{- dict "Content" $content "Path" $targetPath "Defer" true | dict "Page" $ "Data" | partial "store/script.html" -}}
 {{- end -}}
 

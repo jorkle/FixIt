@@ -41,7 +41,7 @@
 
 @each $color, $value in $theme-colors {
   .text-#{$color} {
-    color: var(#{$rootPrefix}#{$color}) !important;
+    color: fixit-var(#{$color}) !important;
   }
 }
 
@@ -53,4 +53,47 @@
 
 .variant-numeric {
   font-variant-numeric: tabular-nums lining-nums;
+}
+
+.rounded-full {
+  @include border-radius(full);
+}
+
+// auto adapt to dark mode by inverting the color and hue
+.auto-dark-mode {
+  [data-theme=dark] & {
+    filter: invert(1) hue-rotate(0.5turn);
+  }
+}
+
+// print view helper
+.page-break-before {
+  break-before: page;
+}
+
+.page-break-after {
+  break-after: page;
+}
+
+@include media('xs', 'up') {
+  .d-none-desktop {
+    display: none;
+  }
+}
+
+@include media('xs') {
+  .d-none-mobile {
+    display: none !important;
+  }
+}
+
+@include media('print') {
+  @page {
+    size: A4 portrait;
+    margin: 1.27cm;
+  }
+
+  .d-none-print {
+    display: none !important;
+  }
 }

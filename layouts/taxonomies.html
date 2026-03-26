@@ -14,7 +14,7 @@
       <div class="card-item-wrapper">
         <h2 class="card-item-title">
           <a href='{{ partial "function/escapeurl.html" .RelPermalink }}'>
-            {{- dict "Class" (add $icon " fa-fw me-1") | partial "plugin/icon.html" -}}
+            {{- dict "Class" (add $icon " me-1") | partial "plugin/icon.html" -}}
             {{- .Page.Title }} <sup>{{ len $pages }}</sup>
           </a>
         </h2>
@@ -23,16 +23,16 @@
             <a href="{{ .RelPermalink }}" class="archive-item-link">
               {{- $repost := .Params.repost | default dict -}}
               {{- if eq $repost.enable true -}}
-                {{- dict "Class" "fa-solid fa-share fa-fw text-success me-1" | partial "plugin/icon.html" -}}
+                {{- dict "Class" "fa-solid fa-share text-success me-1" | partial "plugin/icon.html" -}}
               {{- end -}}
               {{- cond (.Param "capitalizeTitles") (title .LinkTitle) .LinkTitle -}}
             </a>
           </article>
         {{- end -}}
         {{- if gt (len $pages) 5 -}}
-          <span class="more-post">
+          <div class="more-post">
             <a href='{{ partial "function/escapeurl.html" .RelPermalink }}' class="more-single-link">{{ T "pagination.more" }} >></a>
-          </span>
+          </div>
         {{- end -}}
       </div>
     </div>

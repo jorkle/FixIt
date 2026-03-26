@@ -6,7 +6,7 @@
 
 FixIt 是一个面向 Hugo 静态网站生成器的现代化、响应式主题。项目基于以下技术栈：
 
-- **Hugo**: 静态网站生成器（≥ 0.147.7）
+- **Hugo**: 静态网站生成器（≥ 0.156.0）
 - **SCSS**: CSS 预处理器，用于样式开发
 - **JavaScript**: ES6+ 标准，用于前端交互功能
 - **Go Templates**: Hugo 模板引擎
@@ -79,22 +79,18 @@ FixIt/
 
 ### 样式组织原则
 
-1. **主题切换支持**: 使用数据属性选择器
+1. **主题切换支持**: 使用 CSS 变量实现主题切换
 
    ```scss
    .element {
-     color: $global-font-color;
-
-     [data-theme='dark'] & {
-       color: $global-font-color-dark;
-     }
+     color: var(#{$rootPrefix}global-font-color);
    }
    ```
 
 2. **Mixin 使用**: 提高代码复用性
 
    ```scss
-   @include border-radius($global-border-radius);
+   @include border-radius;
    @include transition(all 0.2s ease);
    @include blur;
    ```
@@ -124,7 +120,7 @@ FixIt/
 ```javascript
 // 使用 ES6 类
 export default class Util {
-  copyText(text) {
+  static copyText(text) {
     // ...
   }
 }
@@ -133,7 +129,7 @@ export default class Util {
 class FixIt {
   constructor() {
     this.config = window.config
-    this.util = new Util()
+    this.scrollTop = Util.getScrollTop()
   }
 
   init() {
@@ -188,7 +184,7 @@ class FixIt {
 4. **循环遍历**: 合理使用 range
 
    ```go-html-template
-   {{- range $index, $value := .Site.Languages -}}
+   {{- range $index, $value := .Pages -}}
      <!-- 处理逻辑 -->
    {{- end -}}
    ```
@@ -215,7 +211,7 @@ class FixIt {
 
 1. **前置要求**:
    - Node.js (≥ 20.0.0)
-   - Hugo Extended (≥ 0.147.7)
+   - Hugo Extended (≥ 0.156.0)
    - pnpm (包管理器)
 
 2. **开发命令**:

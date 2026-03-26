@@ -13,7 +13,7 @@
   <a href="https://fixit.lruihao.cn/ecosystem/hugo-fixit/fixit/?lang=russian">Русский язык</a> |
   <a href="https://fixit.lruihao.cn/ecosystem/hugo-fixit/fixit/?lang=spanish">Español</a> |
   <a href="https://fixit.lruihao.cn/ecosystem/hugo-fixit/fixit/?lang=hindi">हिन्दी</a> |
-  <a href="https://fixit.lruihao.cn/ecosystem/hugo-fixit/fixit/?lang=german">deutsch</a> |
+  <a href="https://fixit.lruihao.cn/ecosystem/hugo-fixit/fixit/?lang=deutsch">deutsch</a> |
   <a href="https://fixit.lruihao.cn/ecosystem/hugo-fixit/fixit/?lang=korean">한국어</a> |
   <a href="https://fixit.lruihao.cn/ecosystem/hugo-fixit/fixit/?lang=japanese">しろうと</a>
 </div>
@@ -26,7 +26,7 @@
 
 [![Build](https://img.shields.io/github/deployments/hugo-fixit/FixIt/Production?style=flat&label=Build&logo=vercel)](https://demo.fixit.lruihao.cn/)
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/hugo-fixit/FixIt?style=flat&label=Release&logo=github&include_prereleases)](https://github.com/hugo-fixit/FixIt/releases)
-[![Hugo](https://img.shields.io/badge/Hugo-%5E0.147.7-ff4088?style=flat&logo=hugo)](https://gohugo.io/)
+[![Hugo](https://img.shields.io/badge/Hugo-%5E0.156.0-ff4088?style=flat&logo=hugo)](https://gohugo.io/)
 [![License](https://img.shields.io/github/license/hugo-fixit/FixIt?style=flat&label=License)](/LICENSE)
 [![GitHub stars](https://img.shields.io/github/stars/hugo-fixit/FixIt?style=social)](https://github.com/hugo-fixit/FixIt)
 [![Gitee star of FixIt](https://gitee.com/lruihao/FixIt/badge/star.svg)](https://gitee.com/lruihao/FixIt/stargazers)
@@ -147,6 +147,7 @@ Click the following links to generate a new repository with template:
 - **Diagrams** code fences extended and shortcode supported by [mermaid](https://github.com/knsv/mermaid)
 - **Interactive data visualization** shortcode and code fences extended supported by [ECharts](https://echarts.apache.org/)
 - **Timeline** code fences extended and shortcode supported
+- **File tree** code fences extended and shortcode supported
 - **Mapbox** shortcode supported by [Mapbox GL JS](https://docs.mapbox.com/mapbox-gl-js)
 - **Music player** shortcode supported by [APlayer](https://github.com/MoePlayer/APlayer) and [MetingJS](https://github.com/metowolf/MetingJS)
 - **Bilibili player** and **Douyin player** shortcode
@@ -183,6 +184,8 @@ FixIt supports multilingual and i18n. For more information, see the [Content Man
 - Romanian
 - Vietnamese
 - Hindi
+- Japanese
+- Korean
 
 </details>
 
@@ -200,6 +203,8 @@ The FixIt theme balances **simplicity** and **extensibility** with extra [Hugo t
   🐟 A canvas implemented animation effect of small fish swimming.
 - [cmpt-mdevtools](https://github.com/hugo-fixit/cmpt-mdevtools)\
   Mobile devtools component powered by vConsole and eruda.
+- [cmpt-santa-hat](https://github.com/hugo-fixit/cmpt-santa-hat)\
+  A Christmas Easter Egg by JavaScript.
 - [cmpt-translate](https://github.com/hugo-fixit/cmpt-translate)\
   🌐 A component for site automatic translation.
 - [component-projects](https://github.com/hugo-fixit/component-projects)\
